@@ -152,4 +152,6 @@ python -m time_master.mcp_service
 
 ## 许可证
 
-MIT
+本项目采用 Apache 2.0 许可证 - 详情请参阅 [LICENSE](../../LICENSE) 。
+
+注：本项目是 monorepo 仓库的一部分，许可证文件位于仓库根目录。

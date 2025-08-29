@@ -199,4 +199,6 @@ uv run -m time_master.mcp_service
 
 ## License
 
-MIT
+This project is licensed under the Apache 2.0 License - see the [LICENSE](../../LICENSE) .
+
+Note: This project is part of a monorepo, and the license file is located in the repository root directory.
