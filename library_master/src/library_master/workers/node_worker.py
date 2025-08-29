@@ -1,0 +1,51 @@
+"""Node.js语言Worker"""
+
+from typing import Dict, Any
+from .base import BaseWorker
+from ..exceptions import LibraryNotFoundError
+
+
+class NodeWorker(BaseWorker):
+    """Node.js语言Worker - 处理NPM查询"""
+    
+    def _get_base_url(self) -> str:
+        return "https://registry.npmjs.org"
+    
+    def get_latest_version(self, library: str) -> Dict[str, Any]:
+        """获取Node.js包的最新版本"""
+        url = f"{self.base_url}/{library}"
+        response = self._make_request(url)
+        data = response.json()
+        return {
+            "version": data["dist-tags"]["latest"],
+            "url": f"https://www.npmjs.com/package/{library}"
+        }
+    
+    def get_documentation_url(self, library: str, version: str) -> Dict[str, Any]:
+        """获取Node.js包的文档URL"""
+        url = f"{self.base_url}/{library}/{version}"
+        response = self._make_request(url)
+        data = response.json()
+        doc_url = data.get("homepage") or f"https://www.npmjs.com/package/{library}"
+        return {"doc_url": doc_url}
+    
+    def check_version_exists(self, library: str, version: str) -> Dict[str, Any]:
+        """检查Node.js包版本是否存在"""
+        url = f"{self.base_url}/{library}/{version}"
+        try:
+            self._make_request(url)
+            return {"exists": True}
+        except LibraryNotFoundError:
+            return {"exists": False}
+    
+    def get_dependencies(self, library: str, version: str) -> Dict[str, Any]:
+        """获取Node.js包的依赖关系"""
+        url = f"{self.base_url}/{library}/{version}"
+        response = self._make_request(url)
+        data = response.json()
+        deps = data.get("dependencies", {})
+        dependencies = [
+            {"name": name, "version": version}
+            for name, version in deps.items()
+        ]
+        return {"dependencies": dependencies}
