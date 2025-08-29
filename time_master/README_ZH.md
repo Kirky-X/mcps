@@ -1,6 +1,6 @@
 # TimeMaster MCP
 
-[English Documentation](README.md) | [API参考文档](API_REFERENCE.md) | [版本说明](Release.md)
+[English Documentation](README.md) | [API参考文档](API_REFERENCE.md) | [版本说明](RELEASE_NOTES.md)
 
 一个强大的 MCP（模型上下文协议）时间管理和时区操作服务。TimeMaster 通过标准化的 MCP 接口为 AI 应用程序提供全面的时间、时区和节假日查询功能。
 
@@ -17,7 +17,7 @@
 ## 安装
 
 ```bash
-pip install timemaster
+pip install time-master
 ```
 
 ## v0.1.2 版本新特性
@@ -40,10 +40,10 @@ TimeMaster 提供了一个 [MCP（模型上下文协议）](https://modelcontext
 
 ```bash
 # 启动 MCP 服务
-python -m timemaster.mcp_service
+python -m time_master.mcp_service
 
 # 或使用自定义配置
-TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
+TIMEMASTER_OFFLINE_MODE=true python -m time_master.mcp_service
 ```
 
 ### 可用的 MCP 工具
@@ -100,10 +100,10 @@ TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
 ```json
 {
   "mcpServers": {
-    "timemaster": {
-      "command": "python",
-      "args": ["-m", "timemaster.mcp_service"],
-      "cwd": "/path/to/timemaster"
+    "time-master": {
+      "command": "uv",
+      "args": ["run", "-m", "time_master.mcp_service"],
+      "cwd": "/path/to/time-master"
     }
   }
 }
@@ -128,10 +128,10 @@ export TIMEMASTER_DEFAULT_COUNTRY="CN"
 
 ```bash
 # 使用默认配置启动
-python -m timemaster.mcp_service
+python -m time_master.mcp_service
 
 # 使用环境变量配置启动
-TIMEMASTER_OFFLINE_MODE=true TIMEMASTER_DEFAULT_TIMEZONE="Asia/Shanghai" python -m timemaster.mcp_service
+TIMEMASTER_OFFLINE_MODE=true TIMEMASTER_DEFAULT_TIMEZONE="Asia/Shanghai" python -m time_master.mcp_service
 ```
 
 详细的 Python API 配置和使用方法，请参考 [API 参考文档](API_REFERENCE.md)。
@@ -143,11 +143,11 @@ TIMEMASTER_OFFLINE_MODE=true TIMEMASTER_DEFAULT_TIMEZONE="Asia/Shanghai" python 
 pip install -e ".[dev]"
 
 # 格式化代码
-black timemaster/
-ruff check timemaster/
+black time-master/
+ruff check time-master/
 
 # 运行 MCP 服务进行测试
-python -m timemaster.mcp_service
+python -m time_master.mcp_service
 ```
 
 ## 许可证

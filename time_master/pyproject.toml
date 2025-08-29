@@ -1,5 +1,5 @@
 [project]
-name = "timemaster"
+name = "time-master"
 version = "0.1.2"
 description = "A canonical, high-reliability, developer-first modular common component for handling timezones and time in Python."
 authors = [
@@ -15,7 +15,7 @@ dependencies = [
     "holidays>=0.34",
     "pycountry>=23.12.11",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 readme = "README.md"
 license = { text = "Apache 2.0" }
 
@@ -25,9 +25,12 @@ dev = [
     "black>=21.0.0",
 ]
 
+[project.urls]
+"Repository" = "https://github.com/Kirky-X/mcps"
+
 [project.scripts]
-timemaster = "timemaster.cli:main"
-timemaster-mcp = "timemaster.mcp_service:async_main"
+time-master = "time_master.cli:main"
+time-master-mcp = "time_master.mcp_service:async_main"
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]

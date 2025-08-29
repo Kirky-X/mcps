@@ -3,7 +3,7 @@ Command line interface for TimeMaster
 """
 import argparse
 import sys
-from timemaster import TimeMaster
+from time_master import TimeMaster
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     try:
         if args.search:
             # Search for timezones
-            results = TimeMaster.find_timezones(args.search)
+            results = tm.find_timezones(args.search)
             print(f"Timezones matching '{args.search}':")
             for tz in results:
                 print(f"  {tz}")
@@ -38,10 +38,10 @@ def main():
         elif args.list:
             # List timezones
             if args.list == "all":
-                results = TimeMaster.list_timezones()
+                results = tm.list_timezones()
                 print("All timezones:")
             else:
-                results = TimeMaster.list_timezones(region=args.list)
+                results = tm.list_timezones(region=args.list)
                 print(f"Timezones in region '{args.list}':")
                 
             for tz in results[:20]:  # Limit output

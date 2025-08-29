@@ -9,13 +9,13 @@ TimeMaster provides a comprehensive Python API for time and holiday operations. 
 ## Installation
 
 ```bash
-pip install timemaster
+pip install time-master
 ```
 
 ## Quick Start
 
 ```python
-from timemaster.core import TimeMaster
+from time-master.core import TimeMaster
 
 # Initialize with default configuration
 tm = TimeMaster()
@@ -220,8 +220,8 @@ Create a `config.json` file:
 
 ### Direct Initialization
 ```python
-from timemaster.core import TimeMaster
-from timemaster.config import TimeMasterConfig
+from time-master.core import TimeMaster
+from time-master.config import TimeMasterConfig
 
 # Using configuration object
 config = TimeMasterConfig()
@@ -325,8 +325,8 @@ All interfaces provide appropriate error handling:
 ### Error Handling
 
 ```python
-from timemaster.core import TimeMaster
-from timemaster.exceptions import TimeMasterError
+from time-master.core import TimeMaster
+from time-master.exceptions import TimeMasterError
 
 tm = TimeMaster()
 

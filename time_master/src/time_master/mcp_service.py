@@ -263,7 +263,7 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
         return [TextContent(type="text", text=f"Error executing tool '{name}': {str(e)}")]
 
 def setup_working_directory():
-    """Automatically detect and set the correct working directory for timemaster."""
+    """Automatically detect and set the correct working directory for time_master."""
     try:
         # Get the directory containing this file (src/)
         current_file_dir = Path(__file__).parent

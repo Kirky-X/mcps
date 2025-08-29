@@ -1,6 +1,6 @@
 # TimeMaster MCP
 
-[中文文档](README_ZH.md) | [API Reference](API_REFERENCE.md) | [Release Notes](Release.md)
+[中文文档](README_ZH.md) | [API Reference](API_REFERENCE.md) | [Release Notes](RELEASE_NOTES.md)
 
 A powerful MCP (Model Context Protocol) service for time management and timezone operations. TimeMaster provides AI applications with comprehensive time, timezone, and holiday query capabilities through a standardized MCP interface.
 
@@ -19,17 +19,17 @@ A powerful MCP (Model Context Protocol) service for time management and timezone
 ### Installation
 
 ```bash
-pip install timemaster
+pip install time-master
 ```
 
 ### MCP Service Setup
 
 ```bash
 # Start MCP service
-python -m timemaster.mcp_service
+uv run -m time_master.mcp_service
 
 # Or with custom configuration
-TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
+TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 ```
 
 ## What's New in v0.1.2
@@ -50,10 +50,10 @@ TimeMaster provides an [MCP (Model Context Protocol)](https://modelcontextprotoc
 
 ```bash
 # Start MCP service
-python -m timemaster.mcp_service
+uv run -m time_master.mcp_service
 
 # Or with custom configuration
-TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
+TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 ```
 
 ### Available MCP Tools
@@ -111,10 +111,10 @@ TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
 ```json
 {
   "mcpServers": {
-    "timemaster": {
-      "command": "python",
-      "args": ["-m", "timemaster.mcp_service"],
-      "cwd": "/path/to/timemaster"
+    "time-master": {
+      "command": "uv",
+      "args": ["run", "-m", "time_master.mcp_service"],
+      "cwd": "/path/to/time-master"
     }
   }
 }
@@ -159,13 +159,13 @@ export TIMEMASTER_DEBUG=true
 
 ```bash
 # Start with offline mode
-TIMEMASTER_OFFLINE_MODE=true python -m timemaster.mcp_service
+TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 
 # Start with custom timeout
-TIMEMASTER_TIMEOUT=15 python -m timemaster.mcp_service
+TIMEMASTER_TIMEOUT=15 uv run -m time_master.mcp_service
 
 # Start with debug logging
-TIMEMASTER_DEBUG=true python -m timemaster.mcp_service
+TIMEMASTER_DEBUG=true uv run -m time_master.mcp_service
 ```
 
 ### Migration from v0.1.1
@@ -190,11 +190,11 @@ export TIMEMASTER_OFFLINE_MODE=true
 pip install -e ".[dev]"
 
 # Format code
-black timemaster/
-ruff check timemaster/
+black time-master/
+ruff check time-master/
 
 # Run MCP service for testing
-python -m timemaster.mcp_service
+uv run -m time_master.mcp_service
 ```
 
 ## License
