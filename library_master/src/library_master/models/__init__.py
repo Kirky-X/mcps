@@ -11,6 +11,8 @@ class Language(str, Enum):
     PYTHON = "python"
     JAVA = "java"
     NODE = "node"
+    GO = "go"
+    CPP = "cpp"
 
 
 class LibraryQuery(BaseModel):

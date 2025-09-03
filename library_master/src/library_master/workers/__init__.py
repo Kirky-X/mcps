@@ -5,6 +5,8 @@ from .rust_worker import RustWorker
 from .python_worker import PythonWorker
 from .java_worker import JavaWorker
 from .node_worker import NodeWorker
+from .go_worker import GoWorker
+from .cpp_worker import CppWorker
 from ..models import Language
 
 if TYPE_CHECKING:
@@ -19,6 +21,8 @@ class WorkerFactory:
         Language.PYTHON: PythonWorker,
         Language.JAVA: JavaWorker,
         Language.NODE: NodeWorker,
+        Language.GO: GoWorker,
+        Language.CPP: CppWorker,
     }
     
     @classmethod
@@ -33,19 +37,12 @@ class WorkerFactory:
 
 # 导出所有Worker类
 __all__ = [
-    "RustWorker", 
-    "PythonWorker",
-    "JavaWorker",
-    "NodeWorker",
-    "WorkerFactory"
-]
-
-
-__all__ = [
     "BaseWorker",
     "RustWorker", 
     "PythonWorker",
     "JavaWorker",
     "NodeWorker",
+    "GoWorker",
+    "CppWorker",
     "WorkerFactory"
 ]

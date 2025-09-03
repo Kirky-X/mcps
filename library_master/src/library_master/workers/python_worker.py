@@ -1,50 +1,53 @@
 """Python语言Worker"""
 
+import logging
 import re
 from typing import Dict, Any
 from .base import BaseWorker
 from ..exceptions import LibraryNotFoundError
+from ..core.mirror_config import Language
 
 
 class PythonWorker(BaseWorker):
     """Python语言Worker - 处理PyPI查询"""
+    
+    def __init__(self, timeout: float = 30.0):
+        super().__init__(Language.PYTHON, timeout)
+        self.logger = logging.getLogger(__name__)
+        # Python worker只使用官方PyPI API，因为镜像源通常是simple格式，不兼容JSON API
+        self.effective_urls = ["https://pypi.org/pypi"]
     
     def _get_base_url(self) -> str:
         return "https://pypi.org/pypi"
     
     def get_latest_version(self, library: str) -> Dict[str, Any]:
         """获取Python包的最新版本"""
-        url = f"{self.base_url}/{library}/json"
-        response = self._make_request(url)
+        endpoint = f"/{library}/json"
+        response = self._make_request(endpoint)
         data = response.json()
         return {
-            "version": data["info"]["version"],
-            "url": data["info"]["package_url"]
+            "version": data["info"]["version"]
         }
     
     def get_documentation_url(self, library: str, version: str) -> Dict[str, Any]:
         """获取Python包的文档URL"""
-        url = f"{self.base_url}/{library}/json"
-        response = self._make_request(url)
-        data = response.json()
-        doc_url = data["info"].get("project_urls", {}).get("Documentation")
-        if not doc_url:
-            doc_url = data["info"].get("home_page")
+        # 使用版本特定的URL格式
+        doc_url = f"https://pypi.org/project/{library}/{version}/"
         return {"doc_url": doc_url}
     
     def check_version_exists(self, library: str, version: str) -> Dict[str, Any]:
         """检查Python包版本是否存在"""
-        url = f"{self.base_url}/{library}/{version}/json"
+        endpoint = f"/{library}/{version}/json"
         try:
-            self._make_request(url)
+            self._make_request(endpoint)
             return {"exists": True}
         except LibraryNotFoundError:
             return {"exists": False}
     
     def get_dependencies(self, library: str, version: str) -> Dict[str, Any]:
         """获取Python包的依赖关系"""
-        url = f"{self.base_url}/{library}/{version}/json"
-        response = self._make_request(url)
+        endpoint = f"/{library}/{version}/json"
+        response = self._make_request(endpoint)
         data = response.json()
         requires_dist = data["info"].get("requires_dist", [])
         dependencies = []

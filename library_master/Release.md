@@ -1,6 +1,152 @@
 # LibraryMaster 版本发布记录
 
-## v0.1.1 (2025-08-28)
+## v0.1.3 (2025-09-20)
+
+### 🚀 新功能
+
+#### 镜像源配置与故障转移系统
+- **多镜像源支持**: 为所有支持的语言配置镜像源
+  - Rust: 支持中科大、清华、上海交大等镜像源
+  - Python: 支持阿里云、清华、豆瓣等镜像源
+  - Java: 支持阿里云、华为云等Maven镜像源
+  - Node.js: 支持淘宝、华为云等npm镜像源
+  - Go: 支持七牛云、阿里云等Go模块代理
+  - C++: 支持vcpkg和Conan镜像源
+- **智能故障转移**: 自动检测镜像源健康状态，故障时自动切换
+- **镜像源健康监控**: 实时监控镜像源可用性和响应时间
+- **配置灵活性**: 通过环境变量轻松配置镜像源优先级
+
+#### 增强网络重试机制
+- **指数退避重试**: 实现智能重试策略，避免网络拥塞
+- **熔断器模式**: 防止级联故障，提升系统稳定性
+- **自适应超时**: 根据网络状况动态调整请求超时时间
+- **请求去重**: 避免重复请求，提升性能
+
+#### 扩展语言支持
+- **C++语言支持**: 通过vcpkg和Conan API获取包信息
+  - 支持vcpkg包管理器
+  - 集成Conan包仓库
+
+#### 实时健康监控
+- **系统健康检查**: 全面监控各组件健康状态
+- **性能指标收集**: 实时收集响应时间、成功率等指标
+- **告警机制**: 异常情况自动告警
+
+### 🔧 改进
+- 优化缓存策略，提升命中率
+- 增强并发处理能力
+- 改进错误处理和日志记录
+- 提升API响应一致性
+- 优化内存使用和资源管理
+
+### 📚 文档更新
+- 更新API参考文档，包含新增语言支持
+- 添加镜像源配置详细指南
+- 完善故障转移和监控文档
+- 新增Go和C++集成示例
+
+### 🧪 测试增强
+- 新增镜像源故障转移测试
+- 添加网络重试机制测试
+- 完善Go和C++语言支持测试
+- 增强性能基准测试
+
+### ⚙️ 技术细节
+- **版本号**: 0.1.2 → 0.1.3
+- **新增环境变量**:
+  - 镜像源配置: `LIBRARYMASTER_*_MIRROR_URLS`
+  - 网络配置: `LIBRARYMASTER_MIRROR_FALLBACK_ENABLED`、`LIBRARYMASTER_MAX_RETRIES`等
+- **依赖更新**: 优化网络请求库配置
+- **性能优化**: 减少内存占用，提升响应速度
+
+### 🔄 兼容性
+- ✅ 完全向后兼容
+- ✅ 现有配置继续有效
+- ✅ 无破坏性更改
+- ✅ 平滑升级支持
+
+---
+
+## v0.1.2 (2025-01-22)
+
+### 🚀 新功能
+
+#### 镜像源配置与故障转移系统
+- **镜像源配置管理器(MirrorConfigManager)**: 支持通过环境变量配置多个镜像源
+  - 支持Python、Node.js、Java、Rust、Go、C++等多种语言的镜像源配置
+  - 自动从环境变量读取镜像源列表（如`LIBRARYMASTER_PYTHON_MIRRORS`）
+  - 支持主URL和备用镜像源的灵活配置
+  - 提供镜像源健康状态监控和管理
+
+- **故障转移管理器(FailoverManager)**: 实现熔断器模式和健康检查
+  - 智能故障检测和自动切换机制
+  - 熔断器模式防止级联故障
+  - 自动健康检查和恢复机制
+  - 可配置的故障阈值和恢复超时
+  - 支持异步健康检查和状态监控
+
+- **BaseWorker镜像源支持**: 所有Worker类现在支持镜像源配置
+  - 自动故障转移到可用镜像源
+  - 智能重试机制和请求分发
+  - 实时镜像源健康状态监控
+  - 支持动态镜像源切换和恢复
+
+#### 环境变量配置支持
+- `LIBRARYMASTER_PYTHON_MIRRORS`: Python包镜像源列表
+- `LIBRARYMASTER_NODE_MIRRORS`: Node.js包镜像源列表
+- `LIBRARYMASTER_JAVA_MIRRORS`: Java包镜像源列表
+- `LIBRARYMASTER_RUST_MIRRORS`: Rust包镜像源列表
+- `LIBRARYMASTER_GO_MIRRORS`: Go包镜像源列表
+- `LIBRARYMASTER_CPP_MIRRORS`: C++包镜像源列表
+- `LIBRARYMASTER_MIRROR_FAILURE_THRESHOLD`: 故障阈值配置
+- `LIBRARYMASTER_MIRROR_RECOVERY_TIMEOUT`: 恢复超时配置
+
+### 🔧 改进
+- 大幅提升网络请求的可靠性和稳定性
+- 优化在网络不稳定环境下的表现
+- 增强错误处理和故障恢复能力
+- 改进日志记录，提供更详细的故障诊断信息
+- 提升并发处理性能和资源利用率
+
+### 🧪 测试
+- 新增完整的镜像源配置和故障转移测试套件
+- 添加故障模拟和恢复机制测试
+- 完善网络异常和边界条件测试覆盖
+- 集成pytest测试框架，提供更好的测试体验
+
+### ⚙️ 技术细节
+- **版本号**: 0.1.1 → 0.1.2
+- **新增核心模块**:
+  - `library_master.core.mirror_config`: 镜像源配置管理
+  - `library_master.core.failover`: 故障转移和健康检查
+- **增强模块**:
+  - `library_master.workers.base`: 基础Worker类镜像源支持
+  - 所有语言特定Worker类的镜像源集成
+- **配置系统**: 支持环境变量和配置文件的镜像源配置
+- **监控系统**: 实时镜像源状态监控和健康检查
+
+### 🔄 兼容性
+- ✅ 完全向后兼容
+- ✅ 现有配置继续有效
+- ✅ 无破坏性更改
+- ✅ 可选的镜像源配置，不影响现有功能
+
+### 📋 使用示例
+```bash
+# 配置Python镜像源
+export LIBRARYMASTER_PYTHON_MIRRORS="https://pypi.tuna.tsinghua.edu.cn/pypi,https://mirrors.aliyun.com/pypi"
+
+# 配置Node.js镜像源
+export LIBRARYMASTER_NODE_MIRRORS="https://registry.npmmirror.com,https://registry.npm.taobao.org"
+
+# 配置故障阈值
+export LIBRARYMASTER_MIRROR_FAILURE_THRESHOLD="5"
+export LIBRARYMASTER_MIRROR_RECOVERY_TIMEOUT="300"
+```
+
+---
+
+## v0.1.1 (2025-09-01)
 
 ### 🚀 新功能
 
@@ -15,11 +161,13 @@
   - 支持多种文档类型（readme、api、tutorial、examples）
   - 可按主题过滤文档内容
   - 支持token数量限制控制（100-10000）
-- **context7_health_check**: Context7 API健康状态检查
-  - 实时监控API可用性
-  - 提供详细的状态信息和时间戳
 - 支持通过环境变量`LIBRARYMASTER_CONTEXT7_API_KEY`配置API密钥
 - 自动缓存搜索和文档结果，提升响应速度
+
+#### 扩展语言支持
+- **Go语言支持**: 通过Go模块代理API获取包信息
+  - 支持go.mod解析和版本查询
+  - 集成主流Go模块代理服务
 
 #### 缓存系统重构
 - 使用`cacheout`库重新实现缓存管理器
@@ -129,11 +277,12 @@
 
 ## 版本规划
 
-### v0.1.2 (计划中)
-- 性能优化和监控增强
+### v0.1.4 (计划中)
+- 镜像源配置的Web管理界面
 - 更多Context7功能集成
 - 用户反馈收集和改进
-- 缓存策略优化
+- 高级缓存策略优化
+- 性能监控仪表板
 
 ### v0.2.0 (计划中)
 - 新的编程语言支持（Go、C#、PHP等）

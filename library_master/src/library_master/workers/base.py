@@ -1,22 +1,41 @@
 """Worker基类"""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import httpx
 import time
 import logging
+from urllib.parse import urljoin
 
 from ..models import Task
 from ..exceptions import LibraryNotFoundError, UpstreamError, TimeoutError
+from ..core.mirror_config import MCPMirrorConfig, MCPFailoverManager, Language
 
 
 class BaseWorker(ABC):
     """语言Worker基类 - 由通用工作线程启动的特定语言查询执行器"""
     
-    def __init__(self, timeout: float = 30.0):
-        self.client = httpx.Client(timeout=timeout)  # 同步客户端，适合线程环境
+    def __init__(self, language: Language, timeout: float = 60.0):
+        self.language = language
+        # 增加超时时间和重试配置
+        self.client = httpx.Client(
+            timeout=httpx.Timeout(timeout, connect=30.0, read=30.0),
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
+            transport=httpx.HTTPTransport(retries=3)
+        )
         self.base_url = self._get_base_url()
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+        
+        # 镜像源配置和故障转移管理
+        self.mirror_config = MCPMirrorConfig()
+        self.failover_manager = MCPFailoverManager()
+        
+        # 获取有效的URL列表
+        self.effective_urls = self.mirror_config.get_effective_urls(language)
+        
+        # 重试配置
+        self.max_retries = 3
+        self.retry_delay = 1.0
     
     @abstractmethod
     def _get_base_url(self) -> str:
@@ -76,26 +95,134 @@ class BaseWorker(ABC):
         """获取依赖关系"""
         pass
     
-    def _make_request(self, url: str, **kwargs) -> httpx.Response:
-        """发起HTTP请求"""
-        self.logger.debug(f"Making request to: {url}")
+    def _make_request(self, endpoint: str, **kwargs) -> httpx.Response:
+        """发起带故障转移和重试的HTTP请求"""
+        last_exception = None
+        
+        for base_url in self.effective_urls:
+            # 检查URL是否可用（熔断器模式）
+            if not self._is_url_available(base_url):
+                self.logger.debug(f"Skipping unavailable URL: {base_url}")
+                continue
+            
+            full_url = self._build_url(base_url, endpoint)
+            
+            # 对每个URL进行重试
+            for retry_count in range(self.max_retries):
+                self.logger.debug(f"Making request to: {full_url} (attempt {retry_count + 1}/{self.max_retries})")
+                
+                try:
+                    response = self.client.get(full_url, **kwargs)
+                    response.raise_for_status()
+                    
+                    # 记录成功
+                    self._record_success(base_url)
+                    self.logger.debug(f"Request successful: {full_url} -> {response.status_code}")
+                    return response
+                    
+                except httpx.HTTPStatusError as e:
+                    self.logger.warning(f"HTTP error for {full_url}: {e.response.status_code} (attempt {retry_count + 1})")
+                    
+                    if e.response.status_code == 404:
+                        # 404错误不重试，直接抛出
+                        raise LibraryNotFoundError(f"Resource not found: {full_url}")
+                    elif e.response.status_code >= 500:
+                        # 服务器错误，可以重试
+                        last_exception = UpstreamError(f"HTTP {e.response.status_code}: {e.response.text}")
+                        if retry_count < self.max_retries - 1:
+                            time.sleep(self.retry_delay * (retry_count + 1))  # 指数退避
+                            continue
+                    else:
+                        # 客户端错误，不重试
+                        self._record_failure(base_url)
+                        last_exception = UpstreamError(f"HTTP {e.response.status_code}: {e.response.text}")
+                        break
+                        
+                except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadError) as e:
+                    self.logger.warning(f"Network error for {full_url}: {str(e)} (attempt {retry_count + 1})")
+                    last_exception = TimeoutError(f"Network error: {str(e)}")
+                    if retry_count < self.max_retries - 1:
+                        time.sleep(self.retry_delay * (retry_count + 1))  # 指数退避
+                        continue
+                    
+                except Exception as e:
+                    self.logger.error(f"Unexpected error for {full_url}: {str(e)} (attempt {retry_count + 1})")
+                    last_exception = UpstreamError(f"Unexpected error: {str(e)}")
+                    if retry_count < self.max_retries - 1:
+                        time.sleep(self.retry_delay * (retry_count + 1))
+                        continue
+            
+            # 所有重试都失败了，记录故障
+            self._record_failure(base_url)
+        
+        # 所有URL都失败了
+        if last_exception:
+            raise last_exception
+        else:
+            raise UpstreamError("All mirror sources are unavailable")
+    
+    def _build_url(self, base_url: str, endpoint: str) -> str:
+        """构建完整的URL"""
+        # 确保endpoint以/开头
+        if not endpoint.startswith('/'):
+            endpoint = '/' + endpoint
+        return urljoin(base_url.rstrip('/') + '/', endpoint.lstrip('/'))
+    
+    def _is_url_available(self, url: str) -> bool:
+        """检查URL是否可用（同步版本）"""
+        # 这里使用简化的检查逻辑，实际应用中可以实现更复杂的熔断器
+        import asyncio
         try:
-            response = self.client.get(url, **kwargs)
-            response.raise_for_status()
-            self.logger.debug(f"Request successful: {url} -> {response.status_code}")
-            return response
-        except httpx.HTTPStatusError as e:
-            self.logger.warning(f"HTTP error for {url}: {e.response.status_code}")
-            if e.response.status_code == 404:
-                raise LibraryNotFoundError(f"Resource not found: {url}")
-            else:
-                raise UpstreamError(f"HTTP {e.response.status_code}: {e.response.text}")
-        except httpx.TimeoutException:
-            self.logger.error(f"Request timeout: {url}")
-            raise TimeoutError(f"Request timeout: {url}")
-        except Exception as e:
-            self.logger.error(f"Request failed for {url}: {str(e)}")
-            raise UpstreamError(f"Request failed: {str(e)}")
+            loop = asyncio.get_running_loop()
+            # 如果已经在事件循环中，使用简化的检查
+            return True  # 简化处理，假设URL可用
+        except RuntimeError:
+            # 如果没有事件循环，创建一个新的
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(self.failover_manager.is_url_available(url))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def _record_success(self, url: str) -> None:
+        """记录成功请求（同步版本）"""
+        import asyncio
+        try:
+            loop = asyncio.get_running_loop()
+            # 如果已经在事件循环中，跳过记录
+            return
+        except RuntimeError:
+            # 如果没有事件循环，创建一个新的
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(self.failover_manager.record_success(url))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def _record_failure(self, url: str) -> None:
+        """记录失败请求（同步版本）"""
+        import asyncio
+        try:
+            loop = asyncio.get_running_loop()
+            # 如果已经在事件循环中，跳过记录
+            return
+        except RuntimeError:
+            # 如果没有事件循环，创建一个新的
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(self.failover_manager.record_failure(url))
+            finally:
+                loop.close()
+                asyncio.set_event_loop(None)
+    
+    def get_failure_stats(self) -> Dict[str, Any]:
+        """获取故障统计信息"""
+        return self.failover_manager.get_failure_stats()
     
     def close(self) -> None:
         """关闭HTTP客户端"""

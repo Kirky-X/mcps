@@ -1,6 +1,7 @@
 """Java语言Worker - 使用Maven Central搜索API和POM文件解析"""
 
 import time
+import os
 from typing import Dict, List, Optional, Any
 import requests
 from requests.adapters import HTTPAdapter
@@ -9,16 +10,19 @@ import xml.etree.ElementTree as ET
 
 from .base import BaseWorker
 from ..exceptions import LibraryNotFoundError, UpstreamError
+from ..core.mirror_config import Language
 
 
 class JavaWorker(BaseWorker):
     """Worker for Java libraries using Maven Central Search API and POM file parsing."""
     
     def __init__(self, timeout: float = 30.0):
-        self.search_api_url = "https://search.maven.org/solrsearch/select"
-        self.maven_repo_url = "https://repo1.maven.org/maven2"
+        # 根据文档建议：搜索API使用官方源，文件下载使用阿里云镜像解决国内网络超时问题
+        self.search_api_url = os.getenv('MAVEN_SEARCH_URL', 'https://search.maven.org/solrsearch/select')
+        # 默认使用阿里云镜像来解决国内网络超时问题
+        self.maven_repo_url = os.getenv('MAVEN_CENTRAL_URL', 'https://maven.aliyun.com/repository/public')
         self.timeout = timeout
-        super().__init__(timeout)
+        super().__init__(Language.JAVA, timeout)
         
         # Setup session with retry strategy
         self.session = requests.Session()
@@ -265,11 +269,8 @@ class JavaWorker(BaseWorker):
             if not group_id or not artifact_id:
                 raise LibraryNotFoundError(f"Invalid library name format: {library}")
             
-            # Return Maven Central URL for documentation
-            if version:
-                doc_url = f"https://search.maven.org/artifact/{group_id}/{artifact_id}/{version}/jar"
-            else:
-                doc_url = f"https://search.maven.org/search?q=g:{group_id}+AND+a:{artifact_id}"
+            # Return MVN Repository URL for documentation
+            doc_url = f"https://mvnrepository.com/artifact/{group_id}/{artifact_id}/{version}"
             return {"doc_url": doc_url}
         except Exception as e:
             self.logger.error(f"Error getting documentation URL for {library}: {e}")

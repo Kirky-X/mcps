@@ -34,7 +34,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 },
                                 "language": {
                                     "type": "string",
-                                    "enum": ["rust", "python", "java", "node"],
+                                    "enum": ["rust", "python", "java", "node", "go", "cpp"],
                                     "description": "编程语言"
                                 }
                             },
@@ -63,7 +63,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 },
                                 "language": {
                                     "type": "string",
-                                    "enum": ["rust", "python", "java", "node"],
+                                    "enum": ["rust", "python", "java", "node", "go", "cpp"],
                                     "description": "编程语言"
                                 },
                                 "version": {
@@ -96,7 +96,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 },
                                 "language": {
                                     "type": "string",
-                                    "enum": ["rust", "python", "java", "node"],
+                                    "enum": ["rust", "python", "java", "node", "go", "cpp"],
                                     "description": "编程语言"
                                 },
                                 "version": {
@@ -129,7 +129,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 },
                                 "language": {
                                     "type": "string",
-                                    "enum": ["rust", "python", "java", "node"],
+                                    "enum": ["rust", "python", "java", "node", "go", "cpp"],
                                     "description": "编程语言"
                                 },
                                 "version": {

@@ -1,6 +1,6 @@
 [project]
 name = "library_master"
-version = "0.1.1"
+version = "0.1.3"
 description = "Multi-language Code Package (MCP) latest version query service"
 readme = "README.md"
 authors = [

@@ -45,7 +45,7 @@ class Context7Tools:
                         },
                         "language": {
                             "type": "string",
-                            "enum": ["rust", "python", "java", "node", "javascript", "typescript"],
+                            "enum": ["rust", "python", "java", "node", "go", "cpp"],
                             "description": "编程语言（可选）"
                         },
                         "limit": {
@@ -117,8 +117,7 @@ class Context7Tools:
             
             result = await self.client.search(
                 query=query,
-                language=language,
-                limit=limit
+                language=language
             )
             
             return {
@@ -229,5 +228,15 @@ def create_context7_tools(settings: Settings = None) -> Context7Tools:
         
     Returns:
         Context7Tools 实例
+        
+    Raises:
+        ValueError: 当没有提供 Context7 API 密钥时
     """
+    if settings is None:
+        settings = Settings()
+    
+    # 检查是否提供了 API 密钥
+    if not settings.context7_api_key:
+        raise ValueError("Context7 API key is required but not provided in settings")
+    
     return Context7Tools(settings)
