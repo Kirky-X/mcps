@@ -29,9 +29,13 @@ jobs:
         run: python -m pip install --upgrade build
 
       - name: Build the package
-
         working-directory: ./time_master
         run: python -m build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: time_master/dist/*
 
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
