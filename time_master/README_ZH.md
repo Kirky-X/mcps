@@ -1,6 +1,6 @@
 # TimeMaster MCP
 
-[English Documentation](README.md) | [API参考文档](API_REFERENCE.md) | [版本说明](RELEASE_NOTES.md)
+[English Documentation](README.md) | [API参考文档](API_REFERENCE.md) | [版本说明](Release.md)
 
 一个强大的 MCP（模型上下文协议）时间管理和时区操作服务。TimeMaster 通过标准化的 MCP 接口为 AI 应用程序提供全面的时间、时区和节假日查询功能。
 
