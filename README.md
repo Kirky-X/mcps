@@ -1,6 +1,8 @@
 # MCP Services Monorepo
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![LibraryMaster Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-library_master.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-library_master.yml)
+[![TimeMaster Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-time_master.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-time_master.yml)
 
 A monorepo containing multiple Model Context Protocol (MCP) services for various functionalities.
 
@@ -34,7 +36,7 @@ A powerful MCP service for time management and timezone operations. TimeMaster p
 - Offline mode support
 - Multi-language support
 
-📖 [Documentation](time_master/README.md) | 📚 [API Reference](time_master/API_REFERENCE.md) | 📝 [Release Notes](time_master/RELEASE_NOTES.md)
+📖 [Documentation](time_master/README.md) | 📚 [API Reference](time_master/API_REFERENCE.md) | 📝 [Release Notes](time_master/Release.md)
 
 ## Quick Start
 
@@ -98,7 +100,7 @@ uv run python test/test_mcp_tools.py
 **TimeMaster:**
 ```bash
 cd time_master
-# Run tests as defined in the service
+pytest test/ -v
 ```
 
 ### Code Formatting
@@ -113,8 +115,8 @@ ruff check src/ --fix
 **TimeMaster:**
 ```bash
 # Format code
-black time-master/
-ruff check time-master/ --fix
+black src/
+ruff check src/ --fix
 ```
 
 ## License

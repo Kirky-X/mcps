@@ -1,6 +1,8 @@
 # MCP 服务聚合仓库
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![LibraryMaster Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-library_master.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-library_master.yml)
+[![TimeMaster Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-time_master.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-time_master.yml)
 
 一个包含多个模型上下文协议（MCP）服务的聚合仓库，提供各种功能。
 
@@ -98,7 +100,7 @@ uv run python test/test_mcp_tools.py
 **TimeMaster:**
 ```bash
 cd time_master
-# 按服务中定义的方式运行测试
+pytest test/ -v
 ```
 
 ### 代码格式化
@@ -113,8 +115,8 @@ ruff check src/ --fix
 **TimeMaster:**
 ```bash
 # 格式化代码
-black time-master/
-ruff check time-master/ --fix
+black src/
+ruff check src/ --fix
 ```
 
 ## 许可证
