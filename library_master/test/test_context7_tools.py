@@ -7,9 +7,9 @@ import unittest
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
-from librarymaster.tools.context7_tools import Context7Tools, create_context7_tools
-from librarymaster.clients.context7_client import Context7Client
-from librarymaster.core.config import Settings
+from library_master.tools.context7_tools import Context7Tools, create_context7_tools
+from library_master.clients.context7_client import Context7Client
+from library_master.core.config import Settings
 
 
 class TestContext7Tools(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestContext7Tools(unittest.TestCase):
         self.mock_settings.context7_base_url = "https://api.context7.test"
         
         # 启动 patch
-        self.client_patcher = patch('librarymaster.tools.context7_tools.Context7Client')
+        self.client_patcher = patch('library_master.tools.context7_tools.Context7Client')
         self.mock_client_class = self.client_patcher.start()
         self.mock_client = Mock(spec=Context7Client)
         self.mock_client_class.return_value = self.mock_client
@@ -138,7 +138,7 @@ class TestContext7Tools(unittest.TestCase):
 class TestContext7ToolsFactory(unittest.TestCase):
     """Context7 工具工厂函数测试类"""
     
-    @patch('librarymaster.tools.context7_tools.Context7Client')
+    @patch('library_master.tools.context7_tools.Context7Client')
     def test_create_context7_tools_success(self, mock_client_class):
         """测试工厂函数成功创建工具"""
         settings = Settings(

@@ -1,7 +1,7 @@
 """配置管理模块"""
 
 from typing import Optional
-from pydantic import Field
+from pydantic import Field, ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -107,7 +107,8 @@ class Settings(BaseSettings):
         description="最大缓存条目数"
     )
     
-    class Config:
-        env_prefix = "LIBRARYMASTER_"
-        case_sensitive = False
-        env_file = ".env"
+    model_config = ConfigDict(
+        env_prefix="LIBRARYMASTER_",
+        case_sensitive=False,
+        env_file=".env"
+    )
