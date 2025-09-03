@@ -3,9 +3,11 @@
 提供基于 Context7 API 的库搜索和文档查询工具。
 """
 
-from mcp.types import Tool
-from typing import List, Dict, Any
 import logging
+from typing import List, Dict, Any
+
+from mcp.types import Tool
+
 from ..clients.context7_client import Context7Client
 from ..core.config import Settings
 
@@ -15,7 +17,7 @@ class Context7Tools:
     
     提供库搜索、文档查询和示例获取功能。
     """
-    
+
     def __init__(self, settings: Settings = None):
         """初始化 Context7 工具集
         
@@ -25,7 +27,7 @@ class Context7Tools:
         self.settings = settings or Settings()
         self.client = Context7Client(self.settings)
         self.logger = logging.getLogger(__name__)
-    
+
     def get_tool_definitions(self) -> List[Tool]:
         """获取 Context7 工具定义
         
@@ -98,7 +100,7 @@ class Context7Tools:
                 }
             )
         ]
-    
+
     async def search_libraries(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """搜索库和代码示例
         
@@ -112,20 +114,20 @@ class Context7Tools:
             query = arguments["query"]
             language = arguments.get("language")
             limit = arguments.get("limit", 10)
-            
+
             self.logger.info(f"Searching libraries with query: {query}")
-            
+
             result = await self.client.search(
                 query=query,
                 language=language
             )
-            
+
             return {
                 "success": True,
                 "data": result,
                 "message": f"Found {len(result.get('results', []))} results for query: {query}"
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error searching libraries: {e}")
             return {
@@ -133,7 +135,7 @@ class Context7Tools:
                 "error": str(e),
                 "message": "Failed to search libraries"
             }
-    
+
     async def get_library_docs(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """获取库文档
         
@@ -148,22 +150,22 @@ class Context7Tools:
             doc_type = arguments.get("doc_type")
             topic = arguments.get("topic")
             tokens = arguments.get("tokens")
-            
+
             self.logger.info(f"Getting documentation for {library_path}")
-            
+
             result = await self.client.get_docs(
                 library_path=library_path,
                 doc_type=doc_type,
                 topic=topic,
                 tokens=tokens
             )
-            
+
             return {
                 "success": True,
                 "data": result,
                 "message": f"Successfully retrieved documentation for {library_path}"
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error getting documentation: {e}")
             return {
@@ -171,9 +173,7 @@ class Context7Tools:
                 "error": str(e),
                 "message": "Failed to get documentation"
             }
-    
 
-    
     async def context7_health_check(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """检查 Context7 API 健康状态
         
@@ -185,9 +185,9 @@ class Context7Tools:
         """
         try:
             self.logger.info("Checking Context7 API health")
-            
+
             is_healthy = await self.client.health_check()
-            
+
             return {
                 "success": True,
                 "data": {
@@ -197,7 +197,7 @@ class Context7Tools:
                 },
                 "message": f"Context7 API is {'healthy' if is_healthy else 'unhealthy'}"
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error checking Context7 health: {e}")
             return {
@@ -205,7 +205,7 @@ class Context7Tools:
                 "error": str(e),
                 "message": "Failed to check Context7 API health"
             }
-    
+
     def _get_current_timestamp(self) -> str:
         """获取当前时间戳
         
@@ -214,7 +214,7 @@ class Context7Tools:
         """
         from datetime import datetime
         return datetime.now().isoformat()
-    
+
     def __repr__(self) -> str:
         return f"Context7Tools(api_url='{self.client.base_url}')"
 
@@ -234,9 +234,9 @@ def create_context7_tools(settings: Settings = None) -> Context7Tools:
     """
     if settings is None:
         settings = Settings()
-    
+
     # 检查是否提供了 API 密钥
     if not settings.context7_api_key:
         raise ValueError("Context7 API key is required but not provided in settings")
-    
+
     return Context7Tools(settings)

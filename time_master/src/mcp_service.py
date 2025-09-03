@@ -2,8 +2,8 @@ import asyncio
 import json
 import logging
 from typing import List
-import pytz
 
+import pytz
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
@@ -20,6 +20,7 @@ logger.info(f"TimeMaster initialized, online mode: {timemaster._is_online}")
 
 # Create MCP server
 server = Server("TimeMaster")
+
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
@@ -80,7 +81,6 @@ async def list_tools() -> List[Tool]:
             }
         ),
 
-
         Tool(
             name="calculate_time_difference",
             description="Calculate the time difference between two times in different timezones",
@@ -107,7 +107,6 @@ async def list_tools() -> List[Tool]:
                 "required": ["time1", "tz1", "time2", "tz2"]
             }
         ),
-
 
         Tool(
             name="search_holiday",
@@ -167,6 +166,7 @@ async def list_tools() -> List[Tool]:
         )
     ]
 
+
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> List[TextContent]:
     """Handle tool calls."""
@@ -176,27 +176,27 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             time_str = arguments.get("time_str")
             from_tz = arguments.get("from_tz")
             format_type = arguments.get("format", "iso")
-            
+
             result = timemaster.get_time(
                 timezone=timezone,
                 time_str=time_str,
                 from_tz=from_tz,
                 format=format_type
             )
-            
+
             if time_str:
                 actual_timezone = timezone if timezone else timemaster.get_local_timezone()
                 return [TextContent(type="text", text=f"Converted time: {result} ({actual_timezone})")]
             else:
                 actual_timezone = timezone if timezone else timemaster.get_local_timezone()
                 return [TextContent(type="text", text=f"Current time in {actual_timezone}: {result}")]
-        
 
-        
+
+
         elif name == "get_local_timezone":
             local_tz = timemaster.get_local_timezone()
             return [TextContent(type="text", text=f"Local timezone: {local_tz}")]
-        
+
         elif name == "search_timezones":
             query = arguments.get("query", "")
             limit = arguments.get("limit", 20)
@@ -211,28 +211,28 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                     return [TextContent(type="text", text=f"All timezones (showing {len(matches)}):\n{result}{suffix}")]
             else:
                 return [TextContent(type="text", text=f"No timezones found matching '{query}'")]
-        
 
-        
 
-        
+
+
+
         elif name == "calculate_time_difference":
             tz1 = arguments["tz1"]
             tz2 = arguments["tz2"]
             diff = timemaster.difference(tz1, tz2)
             return [TextContent(type="text", text=f"Time difference between {tz1} and {tz2}: {diff}")]
-        
 
-        
 
-        
+
+
+
         elif name == "search_holiday":
             query = arguments.get("query", "")
             country = arguments.get("country", "")
             timezone = arguments.get("timezone", "")
             year = arguments.get("year")
             limit = arguments.get("limit", 10)
-            
+
             result = timemaster.search_holiday(
                 query=query,
                 country=country if country else None,
@@ -241,24 +241,25 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 limit=limit
             )
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
-        
+
         elif name == "list_holidays":
             country = arguments.get("country", "")
             timezone = arguments.get("timezone", "")
             year = arguments.get("year")
-            
+
             result = timemaster.list_holidays(
                 country=country if country else None,
                 timezone=timezone if timezone else None,
                 year=year
             )
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
-        
+
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
-    
+
     except Exception as e:
         return [TextContent(type="text", text=f"Error executing tool '{name}': {str(e)}")]
+
 
 async def main():
     """Main entry point for the MCP server."""
@@ -269,9 +270,11 @@ async def main():
             server.create_initialization_options()
         )
 
+
 def async_main():
     """Async main entry point for script execution."""
     asyncio.run(main())
+
 
 if __name__ == "__main__":
     asyncio.run(main())

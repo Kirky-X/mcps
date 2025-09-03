@@ -5,12 +5,11 @@ MCP LibraryMaster - 多语言代码包查询服务主入口
 
 import asyncio
 import logging
-from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from .core.server import LibraryMasterServer
 from .core.config import Settings
+from .core.server import LibraryMasterServer
 
 
 def setup_logging(level: str = "INFO") -> None:
@@ -26,13 +25,13 @@ def main() -> None:
     """主函数"""
     # 加载配置
     settings = Settings()
-    
+
     # 设置日志
     setup_logging(settings.log_level)
-    
+
     logger = logging.getLogger(__name__)
     logger.info("Starting MCP LibraryMaster Server...")
-    
+
     try:
         # 创建并启动服务器
         server = LibraryMasterServer(settings)

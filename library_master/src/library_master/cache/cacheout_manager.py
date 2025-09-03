@@ -1,10 +1,10 @@
 """基于 CacheOut 的缓存管理器"""
 
 import time
-from typing import Optional, Dict, Any
 from threading import RLock
+from typing import Optional, Dict, Any
+
 from cacheout import Cache, LRUCache
-from ..exceptions import CacheError
 
 
 class CacheOutManager:
@@ -12,7 +12,7 @@ class CacheOutManager:
     
     提供与原有 CacheManager 兼容的接口，但使用 CacheOut 库实现
     """
-    
+
     def __init__(self, default_ttl: int = 3600, max_size: int = 1000):
         """初始化缓存管理器
         
@@ -23,18 +23,18 @@ class CacheOutManager:
         self.default_ttl = default_ttl
         self.max_size = max_size
         self.lock = RLock()
-        
+
         # 使用 LRUCache 实现 LRU 淘汰策略
         self.cache = LRUCache(
             maxsize=max_size,
             ttl=default_ttl,
             timer=time.time
         )
-        
+
         # 统计信息
         self.hit_count = 0
         self.miss_count = 0
-    
+
     def get(self, key: str) -> Optional[Any]:
         """获取缓存值
         
@@ -56,7 +56,7 @@ class CacheOutManager:
             except KeyError:
                 self.miss_count += 1
                 return None
-    
+
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """设置缓存值
         
@@ -72,7 +72,7 @@ class CacheOutManager:
             else:
                 # 使用指定TTL
                 self.cache.set(key, value, ttl=ttl)
-    
+
     def delete(self, key: str) -> bool:
         """删除缓存
         
@@ -88,7 +88,7 @@ class CacheOutManager:
                 return True
             except KeyError:
                 return False
-    
+
     def clear(self) -> None:
         """清空缓存"""
         with self.lock:
@@ -96,7 +96,7 @@ class CacheOutManager:
             # 重置统计信息
             self.hit_count = 0
             self.miss_count = 0
-    
+
     def size(self) -> int:
         """获取缓存大小
         
@@ -105,9 +105,9 @@ class CacheOutManager:
         """
         with self.lock:
             return len(self.cache)
-    
-    def generate_key(self, language: str, library: str, 
-                    operation: str, version: Optional[str] = None) -> str:
+
+    def generate_key(self, language: str, library: str,
+                     operation: str, version: Optional[str] = None) -> str:
         """生成缓存键
         
         Args:
@@ -123,7 +123,7 @@ class CacheOutManager:
         if version:
             parts.append(version)
         return ":".join(parts)
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """获取缓存统计信息
         
@@ -134,7 +134,7 @@ class CacheOutManager:
             total_entries = len(self.cache)
             total_requests = self.hit_count + self.miss_count
             hit_rate = (self.hit_count / total_requests * 100) if total_requests > 0 else 0
-            
+
             # CacheOut 不直接提供过期条目统计，这里简化处理
             return {
                 "total_entries": total_entries,
@@ -147,7 +147,7 @@ class CacheOutManager:
                 "hit_rate": round(hit_rate, 2),
                 "cache_type": "cacheout"
             }
-    
+
     def evict_expired(self) -> int:
         """手动清理过期条目
         
@@ -157,7 +157,7 @@ class CacheOutManager:
         with self.lock:
             # CacheOut 自动处理过期条目，这里返回0
             return 0
-    
+
     def get_cache_info(self) -> Dict[str, Any]:
         """获取缓存详细信息
         

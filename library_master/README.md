@@ -2,13 +2,16 @@
 
 [中文文档](README_zh.md) | [API Reference](API_REFERENCE.md) | [Release Notes](Release.md)
 
-A powerful MCP (Model Context Protocol) service for library management and dependency operations across Python, Node.js, Java, Rust, Go, and C++ ecosystems, integrated with Context7 API for intelligent library search and documentation queries.
+A powerful MCP (Model Context Protocol) service for library management and dependency operations across Python, Node.js,
+Java, Rust, Go, and C++ ecosystems, integrated with Context7 API for intelligent library search and documentation
+queries.
 
 > ⚠️ **Notice**: Java interfaces may occasionally fail to retrieve due to network or API limitations.
 
 ## Version Features (v0.1.3)
 
 ### 🌟 New Features
+
 - 🌐 **Mirror Source Configuration & Failover**: Support for multiple mirror sources with automatic failover
 - 🔄 **Enhanced Network Retry Mechanism**: Intelligent retry strategies and timeout optimization
 - 🛡️ **Circuit Breaker Pattern**: Protection against cascading failures
@@ -16,6 +19,7 @@ A powerful MCP (Model Context Protocol) service for library management and depen
 - 🌍 **Extended Language Support**: Added Go and C++ language support
 
 ### 🚀 Core Features
+
 - ✨ **Context7 API Integration**: Intelligent library search and documentation queries
 - 🔧 **Cache System Refactor**: Enhanced performance with cacheout library
 - 🛡️ **Full Backward Compatibility**: No breaking changes to existing features
@@ -76,6 +80,7 @@ LIBRARY_MASTER_CONTEXT7_API_KEY=your_key uv run -m library_master.mcp_service
 ## Available MCP Tools
 
 ### Core Library Management Tools
+
 - **`find_latest_versions`** - Find the latest versions of libraries
 - **`check_versions_exist`** - Verify if specific library versions exist
 - **`find_library_docs`** - Get official documentation URLs
@@ -84,6 +89,7 @@ LIBRARY_MASTER_CONTEXT7_API_KEY=your_key uv run -m library_master.mcp_service
 - **`clear_cache`** - Clear cache data
 
 ### Context7 Intelligent Search Tools
+
 - **`search_libraries`** - Use Context7 API to intelligently search for relevant libraries and code examples
 - **`get_library_docs`** - Use Context7 API to get detailed documentation for specified libraries
 - **`context7_health_check`** - Check Context7 API service status

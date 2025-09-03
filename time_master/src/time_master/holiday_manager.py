@@ -1,17 +1,19 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
+
 import holidays
 import pycountry
 from thefuzz import fuzz
 
 logger = logging.getLogger(__name__)
 
+
 class HolidayManager:
     """
     Manages holiday data and queries for different countries and regions.
     """
-    
+
     def __init__(self, cache_ttl: int = 3600):
         """
         Initialize HolidayManager.
@@ -22,7 +24,7 @@ class HolidayManager:
         self._cache = {}
         self._cache_ttl = cache_ttl
         self._timezone_to_country = self._build_timezone_country_mapping()
-    
+
     def _build_timezone_country_mapping(self) -> Dict[str, str]:
         """
         Build a mapping from timezone to country code.
@@ -80,7 +82,7 @@ class HolidayManager:
             'America/Mexico_City': 'MX',
         }
         return mapping
-    
+
     def get_country_from_timezone(self, timezone: str) -> Optional[str]:
         """
         Get country code from timezone.
@@ -94,7 +96,7 @@ class HolidayManager:
         # Direct mapping
         if timezone in self._timezone_to_country:
             return self._timezone_to_country[timezone]
-        
+
         # Try to infer from timezone name
         if timezone.startswith('America/'):
             city = timezone.split('/')[-1]
@@ -117,9 +119,9 @@ class HolidayManager:
             }
             if city in city_country_map:
                 return city_country_map[city]
-        
+
         return None
-    
+
     def get_holidays(self, country: str, year: int = None) -> holidays.HolidayBase:
         """
         Get holidays for a specific country and year.
@@ -133,30 +135,30 @@ class HolidayManager:
         """
         if year is None:
             year = datetime.now().year
-        
+
         cache_key = f"{country}_{year}"
-        
+
         # Check cache
         if cache_key in self._cache:
             cache_entry = self._cache[cache_key]
             if datetime.now().timestamp() - cache_entry['timestamp'] < self._cache_ttl:
                 return cache_entry['data']
-        
+
         try:
             # Get holidays for the country
             country_holidays = holidays.country_holidays(country, years=year)
-            
+
             # Cache the result
             self._cache[cache_key] = {
                 'data': country_holidays,
                 'timestamp': datetime.now().timestamp()
             }
-            
+
             return country_holidays
         except Exception as e:
             logger.warning(f"Failed to get holidays for country {country}: {e}")
             return holidays.country_holidays('US', years=year)  # Fallback to US
-    
+
     def get_next_holiday(self, country: str = None, timezone: str = None) -> Optional[Tuple[str, datetime]]:
         """
         Get the next upcoming holiday.
@@ -170,31 +172,31 @@ class HolidayManager:
         """
         if not country and timezone:
             country = self.get_country_from_timezone(timezone)
-        
+
         if not country:
             country = 'US'  # Default fallback
-        
+
         today = datetime.now().date()
         current_year = today.year
-        
+
         # Get holidays for current and next year
         current_holidays = self.get_holidays(country, current_year)
         next_holidays = self.get_holidays(country, current_year + 1)
-        
+
         # Combine holidays
         all_holidays = dict(current_holidays)
         all_holidays.update(dict(next_holidays))
-        
+
         # Find next holiday
         upcoming_holidays = [(date, name) for date, name in all_holidays.items() if date > today]
-        
+
         if upcoming_holidays:
             upcoming_holidays.sort(key=lambda x: x[0])
             next_date, next_name = upcoming_holidays[0]
             return next_name, datetime.combine(next_date, datetime.min.time())
-        
+
         return None
-    
+
     def calculate_days_to_holiday(self, holiday_name: str, country: str = None, timezone: str = None) -> Optional[int]:
         """
         Calculate days until a specific holiday.
@@ -209,38 +211,39 @@ class HolidayManager:
         """
         if not country and timezone:
             country = self.get_country_from_timezone(timezone)
-        
+
         if not country:
             country = 'US'  # Default fallback
-        
+
         today = datetime.now().date()
         current_year = today.year
-        
+
         # Get holidays for current and next year
         current_holidays = self.get_holidays(country, current_year)
         next_holidays = self.get_holidays(country, current_year + 1)
-        
+
         # Combine holidays
         all_holidays = dict(current_holidays)
         all_holidays.update(dict(next_holidays))
-        
+
         # Find matching holiday using fuzzy matching
         best_match = None
         best_score = 0
-        
+
         for date, name in all_holidays.items():
             if date > today:
                 score = fuzz.partial_ratio(holiday_name.lower(), name.lower())
                 if score > best_score and score > 70:  # Threshold for matching
                     best_score = score
                     best_match = date
-        
+
         if best_match:
             return (best_match - today).days
-        
+
         return None
-    
-    def list_holidays(self, country: str = None, timezone: str = None, year: int = None, limit: int = 10) -> List[Tuple[str, datetime]]:
+
+    def list_holidays(self, country: str = None, timezone: str = None, year: int = None, limit: int = 10) -> List[
+        Tuple[str, datetime]]:
         """
         List holidays for a country.
         
@@ -255,22 +258,22 @@ class HolidayManager:
         """
         if not country and timezone:
             country = self.get_country_from_timezone(timezone)
-        
+
         if not country:
             country = 'US'  # Default fallback
-        
+
         if year is None:
             year = datetime.now().year
-        
+
         country_holidays = self.get_holidays(country, year)
-        
+
         # Convert to list and sort by date
-        holiday_list = [(name, datetime.combine(date, datetime.min.time())) 
-                       for date, name in country_holidays.items()]
+        holiday_list = [(name, datetime.combine(date, datetime.min.time()))
+                        for date, name in country_holidays.items()]
         holiday_list.sort(key=lambda x: x[1])
-        
+
         return holiday_list[:limit]
-    
+
     def calculate_holiday_duration(self, holiday_date: datetime, country: str) -> int:
         """
         Calculate the duration of consecutive holiday days including weekends.
@@ -286,17 +289,17 @@ class HolidayManager:
             target_date = holiday_date.date()
         else:
             target_date = holiday_date
-            
+
         year = target_date.year
         country_holidays = self.get_holidays(country, year)
-        
+
         # Convert holidays to set of dates for faster lookup
         holiday_dates = set(country_holidays.keys())
-        
+
         # Function to check if a date is a holiday or weekend
         def is_non_working_day(date):
             return date in holiday_dates or date.weekday() >= 5  # Saturday=5, Sunday=6
-        
+
         # Find the start of the consecutive holiday period
         start_date = target_date
         while start_date > datetime(year, 1, 1).date():
@@ -304,7 +307,7 @@ class HolidayManager:
             if not is_non_working_day(prev_date):
                 break
             start_date = prev_date
-        
+
         # Find the end of the consecutive holiday period
         end_date = target_date
         while end_date < datetime(year, 12, 31).date():
@@ -312,7 +315,7 @@ class HolidayManager:
             if not is_non_working_day(next_date):
                 break
             end_date = next_date
-        
+
         # Calculate duration
         duration = (end_date - start_date).days + 1
         return duration

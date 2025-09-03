@@ -5,8 +5,8 @@
 - CacheOutManager: 基于 CacheOut 库的缓存管理器
 """
 
-from .manager import CacheManager
 from .cacheout_manager import CacheOutManager
+from .manager import CacheManager
 from ..core.config import Settings
 
 
@@ -21,11 +21,11 @@ def create_cache_manager(settings: Settings = None):
     """
     if settings is None:
         settings = Settings()
-    
+
     cache_type = getattr(settings, 'cache_type', 'cacheout')
     default_ttl = getattr(settings, 'cache_default_ttl', settings.cache_ttl)
     max_size = getattr(settings, 'cache_max_entries', settings.cache_max_size)
-    
+
     if cache_type.lower() == 'memory':
         return CacheManager(
             default_ttl=default_ttl,
@@ -46,6 +46,6 @@ def create_cache_manager(settings: Settings = None):
 
 __all__ = [
     'CacheManager',
-    'CacheOutManager', 
+    'CacheOutManager',
     'create_cache_manager'
 ]

@@ -1,7 +1,9 @@
 """MCP工具定义模块"""
 
-from mcp.types import Tool
 from typing import List
+
+from mcp.types import Tool
+
 from .context7_tools import create_context7_tools
 from ..core.config import Settings
 
@@ -163,7 +165,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
             }
         )
     ]
-    
+
     # 添加 Context7 工具（如果配置了 API 密钥）
     if settings and getattr(settings, 'context7_api_key', None):
         try:
@@ -173,5 +175,5 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
             # 如果 Context7 工具初始化失败，记录警告但不影响其他工具
             import logging
             logging.warning(f"Failed to initialize Context7 tools: {e}")
-    
+
     return tools

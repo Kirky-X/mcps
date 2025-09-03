@@ -9,6 +9,7 @@ import asyncio
 import logging
 from typing import Optional
 from urllib.parse import urlencode
+
 import httpx
 
 from ..core.config import Settings
@@ -20,7 +21,7 @@ class Context7Client:
     提供库搜索和文档查询功能的接口。
     注意：这是一个兼容实现，因为 Context7 实际上是 MCP 服务器。
     """
-    
+
     def __init__(self, settings: Settings = None):
         """初始化 Context7 客户端
         
@@ -29,23 +30,23 @@ class Context7Client:
         """
         if settings is None:
             settings = Settings()
-            
+
         self.api_key = settings.context7_api_key
         self.base_url = settings.context7_base_url or "https://context7.com/api/v1"
         self.timeout = settings.request_timeout
-        
+
         # HTTP客户端配置
         self.max_retries = 3
         self.retry_delay = 1.0
         self.backoff_factor = 2.0
-        
+
         # 设置请求头
         self.headers = {}
         if self.api_key:
             self.headers["Authorization"] = f"Bearer {self.api_key}"
-            
+
         self.logger = logging.getLogger(__name__)
-        
+
         # Mock数据用于测试
         self._mock_libraries = {
             "requests": {
@@ -70,7 +71,7 @@ class Context7Client:
                 "docs": "Tokio is an asynchronous runtime for the Rust programming language."
             }
         }
-    
+
     async def _make_request_with_retry(self, url: str, method: str = "GET") -> httpx.Response:
         """带重试机制的HTTP请求
         
@@ -85,7 +86,7 @@ class Context7Client:
             httpx.HTTPStatusError: 最终请求失败
         """
         last_exception = None
-        
+
         for attempt in range(self.max_retries + 1):
             try:
                 async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -93,18 +94,18 @@ class Context7Client:
                         response = await client.get(url, headers=self.headers)
                     else:
                         raise ValueError(f"Unsupported HTTP method: {method}")
-                    
+
                     response.raise_for_status()
                     return response
-                    
+
             except httpx.HTTPStatusError as e:
                 last_exception = e
-                
+
                 # 对于某些错误码，不进行重试
                 if e.response.status_code in [400, 401, 403, 404]:
                     self.logger.error(f"Non-retryable error {e.response.status_code}: {e}")
                     raise
-                
+
                 # 对于429 (Too Many Requests) 和 5xx 错误，进行重试
                 if e.response.status_code in [429, 500, 502, 503, 504]:
                     if attempt < self.max_retries:
@@ -115,13 +116,13 @@ class Context7Client:
                         )
                         await asyncio.sleep(delay)
                         continue
-                
+
                 # 其他HTTP错误直接抛出
                 raise
-                
+
             except (httpx.RequestError, httpx.TimeoutException) as e:
                 last_exception = e
-                
+
                 if attempt < self.max_retries:
                     delay = self.retry_delay * (self.backoff_factor ** attempt)
                     self.logger.warning(
@@ -130,19 +131,19 @@ class Context7Client:
                     )
                     await asyncio.sleep(delay)
                     continue
-                
+
                 # 最后一次尝试失败，抛出异常
                 self.logger.error(f"Request failed after {self.max_retries + 1} attempts: {e}")
                 raise
-        
+
         # 如果所有重试都失败了，抛出最后一个异常
         if last_exception:
             raise last_exception
-    
+
     async def _simulate_delay(self):
         """模拟网络延迟"""
         await asyncio.sleep(0.1)  # 100ms 延迟模拟网络请求
-    
+
     async def search(self, query: str, language: Optional[str] = None) -> dict:
         """搜索库
         
@@ -156,16 +157,16 @@ class Context7Client:
         # 如果没有API key，使用mock数据
         if not self.api_key:
             await self._simulate_delay()
-            
+
             # 模拟搜索逻辑
             results = []
             query_lower = query.lower()
-            
+
             for lib_name, lib_info in self._mock_libraries.items():
                 # 检查查询是否匹配库名或描述
-                if (query_lower in lib_name.lower() or 
-                    query_lower in lib_info["description"].lower()):
-                    
+                if (query_lower in lib_name.lower() or
+                        query_lower in lib_info["description"].lower()):
+
                     # 如果指定了语言，进行过滤
                     if language is None or lib_info["language"].lower() == language.lower():
                         results.append({
@@ -174,26 +175,26 @@ class Context7Client:
                             "language": lib_info["language"],
                             "version": lib_info["version"]
                         })
-            
+
             return {
                 "results": results,
                 "total": len(results),
                 "query": query,
                 "language": language
             }
-        
+
         # 使用真实API
         try:
             # 构建查询参数 - 根据文档，只需要query参数
             params = {"query": query}
-            
+
             # 构建URL
             url = f"{self.base_url}/search?{urlencode(params)}"
-            
+
             # 发送请求
             response = await self._make_request_with_retry(url)
             result = response.json()
-            
+
             # 如果指定了语言过滤，在客户端进行过滤
             if language and "results" in result:
                 filtered_results = []
@@ -202,9 +203,9 @@ class Context7Client:
                     if self._matches_language(item, language):
                         filtered_results.append(item)
                 result["results"] = filtered_results
-            
+
             return result
-            
+
         except Exception as e:
             self.logger.error(f"Search request failed: {e}")
             # 如果API请求失败，回退到mock数据
@@ -216,13 +217,13 @@ class Context7Client:
                 return result
             finally:
                 self.api_key = original_api_key
-    
+
     def _matches_language(self, item: dict, language: str) -> bool:
         """检查搜索结果项是否匹配指定语言"""
         # 简单的语言匹配逻辑，可以根据需要扩展
         title = item.get("title", "").lower()
         description = item.get("description", "").lower()
-        
+
         language_keywords = {
             "python": ["python", "py", "pip"],
             "javascript": ["javascript", "js", "node", "npm"],
@@ -233,10 +234,10 @@ class Context7Client:
             "cpp": ["c++", "cpp", "cmake"],
             "c": ["c", "gcc"]
         }
-        
+
         keywords = language_keywords.get(language.lower(), [language.lower()])
         return any(keyword in title or keyword in description for keyword in keywords)
-    
+
     async def get_docs(self, library_path: str, doc_type: str = "txt", topic: str = None, tokens: int = 5000) -> str:
         """获取库文档
         
@@ -252,32 +253,32 @@ class Context7Client:
         # 如果没有API key，使用mock数据
         if not self.api_key:
             await self._simulate_delay()
-            
+
             # 检查库是否存在
             if library_path not in self._mock_libraries:
                 return f"Library '{library_path}' not found."
-            
+
             lib_info = self._mock_libraries[library_path]
-            
+
             # 生成mock文档内容
             docs = f"# {lib_info['name']} Documentation\n\n"
             docs += f"## Overview\n{lib_info['description']}\n\n"
             docs += f"## Installation\n{self._get_install_command(lib_info['language'], lib_info['name'])}\n\n"
             docs += f"## Basic Usage\n{self._get_usage_example(lib_info['name'], lib_info['language'])}\n\n"
             docs += f"## Version\n{lib_info['version']}\n\n"
-            
+
             if topic:
                 docs += f"## {topic.title()}\nSpecific documentation for {topic} topic.\n\n"
-            
+
             # 根据tokens参数调整内容长度
             if tokens < 1000:
                 docs = docs[:tokens]
             elif tokens > 5000:
                 docs += "## Advanced Features\nDetailed advanced features and examples...\n\n"
                 docs += "## API Reference\nComplete API reference documentation...\n\n"
-            
+
             return docs
-        
+
         # 使用真实API
         try:
             # 构建查询参数
@@ -288,7 +289,7 @@ class Context7Client:
                 params["topic"] = topic
             if tokens:
                 params["tokens"] = tokens
-            
+
             # 对于简单的库名，我们需要找到对应的完整路径
             # 首先尝试通过搜索找到正确的ID
             if "/" not in library_path:
@@ -308,17 +309,17 @@ class Context7Client:
                 except:
                     # 如果搜索失败，使用默认格式
                     library_path = f"websites/pypi_org_project_{library_path}"
-            
+
             # URL编码路径中的特殊字符
             library_path = library_path.replace("/", "%2F")
-            
+
             # 构建URL - 库名作为路径的一部分，按照文档格式
             url = f"{self.base_url}/{library_path}?{urlencode(params)}"
-            
+
             # 发送请求
             response = await self._make_request_with_retry(url)
             return response.text
-            
+
         except Exception as e:
             self.logger.error(f"Get docs request failed: {e}")
             # 如果API请求失败，回退到mock数据
@@ -330,9 +331,7 @@ class Context7Client:
                 return result
             finally:
                 self.api_key = original_api_key
-    
 
-    
     def _get_install_command(self, language: str, library_name: str) -> str:
         """获取安装命令"""
         commands = {
@@ -341,7 +340,7 @@ class Context7Client:
             "rust": f"cargo add {library_name}"
         }
         return commands.get(language, f"# Install {library_name}")
-    
+
     def _get_usage_example(self, language: str, library_name: str) -> str:
         """获取使用示例"""
         examples = {
@@ -350,7 +349,7 @@ class Context7Client:
             "rust": f"use {library_name};\n// Use {library_name} here"
         }
         return examples.get(language, f"// Use {library_name}")
-    
+
     async def health_check(self) -> dict:
         """健康检查
         
@@ -360,7 +359,7 @@ class Context7Client:
         # 如果没有API key，使用mock数据
         if not self.api_key:
             await self._simulate_delay()
-            
+
             return {
                 "status": "healthy",
                 "service": "context7",
@@ -368,16 +367,16 @@ class Context7Client:
                 "timestamp": "2024-01-01T00:00:00Z",
                 "available_libraries": len(self._mock_libraries)
             }
-        
+
         # 使用真实API - 尝试调用search端点来检查服务状态
         try:
             # 使用一个简单的搜索请求来检查API是否可用
             url = f"{self.base_url}/search?{urlencode({'query': 'test'})}"
-            
+
             # 发送请求
             response = await self._make_request_with_retry(url)
             result = response.json()
-            
+
             return {
                 "status": "healthy",
                 "service": "context7",
@@ -386,7 +385,7 @@ class Context7Client:
                 "api_available": True,
                 "results_count": len(result.get("results", []))
             }
-            
+
         except Exception as e:
             self.logger.error(f"Health check request failed: {e}")
             # 如果API请求失败，回退到mock数据
@@ -399,6 +398,6 @@ class Context7Client:
                 "error": str(e),
                 "fallback": True
             }
-    
+
     def __repr__(self) -> str:
         return f"Context7Client(base_url='{self.base_url}')"

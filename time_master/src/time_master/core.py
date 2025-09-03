@@ -5,15 +5,16 @@ import datetime
 import logging
 import socket
 import time
-from typing import Optional, Union, List
-import requests
-import pytz
+from typing import Optional, List
+
 import holidays
-from tzlocal import get_localzone
-from thefuzz import process
+import pytz
+import requests
 from requests.exceptions import RequestException, Timeout
+from thefuzz import process
+from tzlocal import get_localzone
+
 from .config import TimeMasterConfig
-from .exceptions import TimeMasterError
 from .holiday_manager import HolidayManager
 
 # Configure logging
@@ -25,12 +26,12 @@ class TimeMaster:
     A canonical, high-reliability, developer-first modular common component 
     for handling timezones and time in Python.
     """
-    
+
     # Predefined format constants
     FORMAT_ISO = "iso"
     FORMAT_FRIENDLY_CN = "friendly_cn"
-    
-    def __init__(self, api_endpoint: Optional[str] = None, timeout: Optional[int] = None, 
+
+    def __init__(self, api_endpoint: Optional[str] = None, timeout: Optional[int] = None,
                  cache_ttl: Optional[int] = None, config: Optional[TimeMasterConfig] = None,
                  auto_local_timezone: Optional[bool] = None):
         """
@@ -45,35 +46,36 @@ class TimeMaster:
         """
         # Use provided config or create default one
         self._config = config or TimeMasterConfig()
-        
+
         # Override config with explicit parameters if provided
         self.api_endpoint = api_endpoint or self._config.api_endpoint
         self.timeout = timeout or self._config.timeout
         self.cache_ttl = cache_ttl or self._config.cache_ttl
-        
+
         # Cache storage: {timezone: (timestamp, data)}
         self._cache = {}
-        
+
         # Online/offline mode state - read from config
         self._force_offline = self._config.is_offline_mode()
         self._is_online = self._check_network_connectivity()
-        
+
         # Auto timezone detection - use parameter if provided, otherwise use config
         if auto_local_timezone is not None:
             self._auto_local_timezone = auto_local_timezone
         else:
             self._auto_local_timezone = self._config.should_auto_detect_timezone()
-            
+
         self._holiday_manager = HolidayManager(cache_ttl=self._config.cache_ttl)
-        
+
         # Auto-detect local timezone if enabled
         if self._auto_local_timezone:
             self._detected_local_timezone = self._auto_detect_local_timezone()
         else:
             self._detected_local_timezone = None
-        
-        logger.info(f"TimeMaster initialized. Online mode: {self._is_online}, Auto timezone: {self._auto_local_timezone}")
-    
+
+        logger.info(
+            f"TimeMaster initialized. Online mode: {self._is_online}, Auto timezone: {self._auto_local_timezone}")
+
     def _check_network_connectivity(self) -> bool:
         """
         Check network connectivity by attempting to connect to a reliable endpoint.
@@ -83,16 +85,14 @@ class TimeMaster:
         """
         if self._force_offline:
             return False
-            
+
         try:
             # Try to connect to Google DNS
             socket.create_connection(("8.8.8.8", 53), timeout=self.timeout)
             return True
         except OSError:
             return False
-    
 
-    
     def _get_online_time(self, timezone: str) -> datetime.datetime:
         """
         Get current time for a timezone using the online API.
@@ -114,14 +114,14 @@ class TimeMaster:
             if current_time - cache_time < self.cache_ttl:
                 logger.debug(f"Cache hit for timezone: {timezone}")
                 return cached_data
-        
+
         # Make API request
         url = f"{self.api_endpoint}/timezone/{timezone}"
         try:
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
             data = response.json()
-            
+
             # Parse datetime from API response
             dt_str = data['datetime']
             # Handle the timezone offset format from World Time API
@@ -131,24 +131,24 @@ class TimeMaster:
                 dt_part, _ = dt_str.rsplit('-', 1)
             else:
                 dt_part = dt_str
-            
+
             # Create datetime object
             dt = datetime.datetime.fromisoformat(dt_part)
-            
+
             # Apply timezone info
             tz = pytz.timezone(timezone)
             aware_dt = tz.localize(dt)
-            
+
             # Cache the result
             self._cache[timezone] = (current_time, aware_dt)
-            
+
             logger.debug(f"Retrieved time for {timezone} from online API")
             return aware_dt
-            
+
         except (RequestException, Timeout, KeyError) as e:
             logger.warning(f"Failed to get time from API for timezone {timezone}: {e}")
             raise
-    
+
     def _get_offline_time(self, timezone: str) -> datetime.datetime:
         """
         Get current time for a timezone using the local system.
@@ -168,8 +168,9 @@ class TimeMaster:
             logger.error(f"Failed to get time locally for timezone {timezone}: {e}")
             # Fallback to UTC
             return datetime.datetime.now(pytz.UTC)
-    
-    def get_time(self, timezone: str = None, time_str: str = None, from_tz: str = None, format: str = FORMAT_ISO) -> str:
+
+    def get_time(self, timezone: str = None, time_str: str = None, from_tz: str = None,
+                 format: str = FORMAT_ISO) -> str:
         """
         Unified time interface that can get current time or convert existing time.
         
@@ -188,23 +189,23 @@ class TimeMaster:
                 timezone = self.get_local_timezone()
             else:
                 timezone = "UTC"
-        
+
         if time_str is not None:
             # Convert existing time
             if from_tz is None:
                 raise ValueError("from_tz is required when converting existing time")
-            
+
             import datetime
             import pytz
-            
+
             # Parse the input time string
             dt = datetime.datetime.fromisoformat(time_str.replace('Z', '+00:00'))
-            
+
             # If datetime is naive, localize it to the source timezone
             if dt.tzinfo is None:
                 from_timezone = pytz.timezone(from_tz)
                 dt = from_timezone.localize(dt)
-            
+
             # Convert to target timezone
             converted_time = self.convert(dt, timezone)
             return self._format_time(converted_time, format)
@@ -220,9 +221,9 @@ class TimeMaster:
                     current_time = self._get_offline_time(timezone)
             else:
                 current_time = self._get_offline_time(timezone)
-            
+
             return self._format_time(current_time, format)
-    
+
     def now(self, timezone: str = None, format: str = FORMAT_ISO) -> str:
         """
         Get current time in specified timezone with specified format.
@@ -235,7 +236,7 @@ class TimeMaster:
             Formatted time string
         """
         return self.get_time(timezone=timezone, format=format)
-    
+
     def _format_time(self, dt: datetime.datetime, format: str) -> str:
         """
         Format datetime object according to specified format.
@@ -255,7 +256,7 @@ class TimeMaster:
         else:
             # Default to ISO format
             return dt.isoformat()
-    
+
     def convert(self, dt: datetime.datetime, target_timezone: str) -> datetime.datetime:
         """
         Convert a datetime object to a target timezone.
@@ -270,9 +271,9 @@ class TimeMaster:
         # Validate target timezone
         if target_timezone not in pytz.all_timezones:
             raise ValueError(f"Invalid target timezone: {target_timezone}")
-        
+
         target_tz = pytz.timezone(target_timezone)
-        
+
         # Handle naive datetime
         if dt.tzinfo is None:
             # Assume it's in local timezone
@@ -284,11 +285,11 @@ class TimeMaster:
             else:
                 # zoneinfo timezone
                 dt = dt.replace(tzinfo=local_tz)
-        
+
         # Convert to target timezone
         converted_dt = dt.astimezone(target_tz)
         return converted_dt
-    
+
     def difference(self, tz1: str, tz2: str) -> datetime.timedelta:
         """
         Calculate the time difference between two timezones.
@@ -305,7 +306,7 @@ class TimeMaster:
             raise ValueError(f"Invalid timezone: {tz1}")
         if tz2 not in pytz.all_timezones:
             raise ValueError(f"Invalid timezone: {tz2}")
-        
+
         # Get current time in both timezones
         try:
             if self._is_online and not self._force_offline:
@@ -319,14 +320,14 @@ class TimeMaster:
             logger.warning("Falling back to offline mode")
             dt1 = self._get_offline_time(tz1)
             dt2 = self._get_offline_time(tz2)
-        
+
         # Convert both to UTC for accurate difference calculation
         utc1 = dt1.astimezone(pytz.UTC)
         utc2 = dt2.astimezone(pytz.UTC)
-        
+
         # Calculate difference
         return utc1 - utc2
-    
+
     def find_timezones(self, query: str, limit: int = 20) -> List[str]:
         """
         Find timezones matching the query using fuzzy search.
@@ -343,24 +344,24 @@ class TimeMaster:
             # Return all timezones if query is empty
             all_timezones = sorted(list(pytz.all_timezones))
             return all_timezones[:limit]
-        
+
         query_lower = query.lower()
         # Also create a version with spaces replaced by underscores for better matching
         query_underscore = query_lower.replace(" ", "_")
         matches = []
-        
+
         for tz in pytz.all_timezones:
             tz_lower = tz.lower()
             # Check both original query and underscore version
-            if (query_lower in tz_lower or 
-                query_underscore in tz_lower or
-                query_lower in tz_lower.replace("_", " ")):
+            if (query_lower in tz_lower or
+                    query_underscore in tz_lower or
+                    query_lower in tz_lower.replace("_", " ")):
                 matches.append(tz)
                 if len(matches) >= limit:
                     break
-        
+
         return sorted(matches)
-    
+
     def list_timezones(self, region: str = "") -> List[str]:
         """
         List all available timezones, optionally filtered by region.
@@ -372,13 +373,13 @@ class TimeMaster:
             List of timezone names
         """
         all_timezones = list(pytz.all_timezones)
-        
+
         if region:
             filtered = [tz for tz in all_timezones if tz.startswith(region)]
             return sorted(filtered)
-        
+
         return sorted(all_timezones)
-    
+
     def _auto_detect_local_timezone(self) -> str:
         """
         Auto-detect local timezone with network fallback.
@@ -399,7 +400,7 @@ class TimeMaster:
                         return timezone
             except Exception as e:
                 logger.warning(f"Network timezone detection failed: {e}")
-        
+
         # Fallback to local system detection
         try:
             import tzlocal
@@ -410,7 +411,7 @@ class TimeMaster:
         except Exception as e:
             logger.warning(f"System timezone detection failed: {e}")
             return "UTC"
-    
+
     def get_local_timezone(self) -> str:
         """
         Get the local system timezone.
@@ -421,7 +422,7 @@ class TimeMaster:
         # Use auto-detected timezone if available
         if self._detected_local_timezone:
             return self._detected_local_timezone
-        
+
         # Fallback to system detection
         try:
             import tzlocal
@@ -430,7 +431,7 @@ class TimeMaster:
         except Exception as e:
             logger.warning(f"Failed to get local timezone: {e}")
             return "UTC"
-    
+
     def get_next_holiday(self, country: str = None, timezone: str = None):
         """
         Get the next upcoming holiday.
@@ -444,25 +445,25 @@ class TimeMaster:
         """
         if not timezone and not country:
             timezone = self.get_local_timezone()
-        
+
         if not country:
             country = self.get_country_from_timezone(timezone)
-        
+
         try:
             holidays_data = holidays.country_holidays(country, years=datetime.datetime.now().year)
             today = datetime.datetime.now().date()
-            
+
             upcoming_holidays = []
             for date, name in holidays_data.items():
                 if date >= today:
                     days_until = (date - today).days
-                    
+
                     # Calculate holiday duration
                     holiday_duration = self._holiday_manager.calculate_holiday_duration(
                         datetime.datetime.combine(date, datetime.datetime.min.time()),
                         country
                     )
-                    
+
                     upcoming_holidays.append({
                         "name": name,
                         "date": date.strftime("%Y-%m-%d"),
@@ -471,7 +472,7 @@ class TimeMaster:
                         "days_until": days_until,
                         "holiday_duration": holiday_duration
                     })
-            
+
             if upcoming_holidays:
                 # Sort by date and return the earliest one
                 upcoming_holidays.sort(key=lambda x: x["date"])
@@ -481,7 +482,7 @@ class TimeMaster:
         except Exception as e:
             logger.error(f"Error getting next holiday: {e}")
             return None
-    
+
     def calculate_days_to_holiday(self, holiday_name: str, country: str = None, timezone: str = None):
         """
         Calculate days until a specific holiday.
@@ -496,9 +497,9 @@ class TimeMaster:
         """
         if not timezone and not country:
             timezone = self.get_local_timezone()
-        
+
         return self._holiday_manager.calculate_days_to_holiday(holiday_name, country=country, timezone=timezone)
-    
+
     def list_holidays(self, country: str = None, timezone: str = None, year: int = None):
         """
         List all holidays for a specific country and year.
@@ -513,24 +514,24 @@ class TimeMaster:
         """
         if not timezone and not country:
             timezone = self.get_local_timezone()
-        
+
         if not country:
             country = self.get_country_from_timezone(timezone)
-        
+
         if not year:
             year = datetime.datetime.now().year
-        
+
         try:
             holidays_data = holidays.country_holidays(country, years=year)
             holidays_list = []
-            
+
             for date, name in holidays_data.items():
                 # Calculate holiday duration
                 holiday_duration = self._holiday_manager.calculate_holiday_duration(
                     datetime.datetime.combine(date, datetime.datetime.min.time()),
                     country
                 )
-                
+
                 holidays_list.append({
                     "name": name,
                     "date": date.strftime("%Y-%m-%d"),
@@ -538,16 +539,17 @@ class TimeMaster:
                     "year": year,
                     "holiday_duration": holiday_duration
                 })
-            
+
             # Sort by date
             holidays_list.sort(key=lambda x: x["date"])
-            
+
             return holidays_list
         except Exception as e:
             logger.error(f"Error listing holidays: {e}")
             return []
-    
-    def search_holiday(self, query: str = "", country: str = None, timezone: str = None, year: int = None, limit: int = 10):
+
+    def search_holiday(self, query: str = "", country: str = None, timezone: str = None, year: int = None,
+                       limit: int = 10):
         """
         Search for holidays by name. If query is empty, returns the next upcoming holiday.
         
@@ -563,7 +565,7 @@ class TimeMaster:
         """
         if not timezone and not country:
             timezone = self.get_local_timezone()
-        
+
         # If query is empty, return next upcoming holiday
         if not query or query.strip() == "":
             next_holiday = self.get_next_holiday(country=country, timezone=timezone)
@@ -571,35 +573,35 @@ class TimeMaster:
                 return [next_holiday]
             else:
                 return []
-        
+
         # Get all holidays for the year
         all_holidays = self.list_holidays(country=country, timezone=timezone, year=year)
-        
+
         # Filter holidays by query and add days_until
         query_lower = query.lower()
         matching_holidays = []
         today = datetime.datetime.now().date()
-        
+
         for holiday in all_holidays:
             if query_lower in holiday["name"].lower():
                 # Add days_until calculation
                 holiday_date = datetime.datetime.strptime(holiday["date"], "%Y-%m-%d").date()
                 days_until = (holiday_date - today).days
                 holiday["days_until"] = days_until
-                
+
                 # Add holiday duration calculation
                 holiday_duration = self._holiday_manager.calculate_holiday_duration(
                     datetime.datetime.combine(holiday_date, datetime.datetime.min.time()),
                     holiday["country"]
                 )
                 holiday["holiday_duration"] = holiday_duration
-                
+
                 matching_holidays.append(holiday)
                 if len(matching_holidays) >= limit:
                     break
-        
+
         return matching_holidays
-    
+
     def get_country_from_timezone(self, timezone: str = None):
         """
         Get country code from timezone.
@@ -612,5 +614,5 @@ class TimeMaster:
         """
         if not timezone:
             timezone = self.get_local_timezone()
-        
+
         return self._holiday_manager.get_country_from_timezone(timezone)

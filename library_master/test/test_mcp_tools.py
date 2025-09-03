@@ -11,35 +11,34 @@
 
 import asyncio
 import json
-import sys
-from typing import List, Dict, Any
+from typing import Dict, Any
 
-from library_master.core.server import LibraryMasterServer
 from library_master.core.config import Settings
+from library_master.core.server import LibraryMasterServer
 from library_master.models import Language, LibraryQuery
 
 
 class MCPToolTester:
     """MCP工具测试器"""
-    
+
     def __init__(self):
         """初始化测试器"""
         settings = Settings()
         self.server = LibraryMasterServer(settings)
-    
+
     def print_raw_result(self, tool_name: str, params: Dict[str, Any], result: Any):
         """打印原始接口结果"""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"工具: {tool_name}")
         print(f"参数: {json.dumps(params, ensure_ascii=False, indent=2)}")
         print(f"原始结果:")
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        print(f"{'='*60}")
-    
+        print(f"{'=' * 60}")
+
     async def test_find_latest_versions(self):
         """测试find_latest_versions工具"""
         print("\n🔍 测试 find_latest_versions 工具")
-        
+
         test_cases = [
             # Rust库测试
             {
@@ -83,7 +82,7 @@ class MCPToolTester:
                 ]
             }
         ]
-        
+
         for i, params in enumerate(test_cases, 1):
             print(f"\n--- 测试用例 {i} ---")
             try:
@@ -91,11 +90,11 @@ class MCPToolTester:
                 self.print_raw_result("find_latest_versions", params, result)
             except Exception as e:
                 print(f"错误: {e}")
-    
+
     async def test_find_library_docs(self):
         """测试find_library_docs工具"""
         print("\n📚 测试 find_library_docs 工具")
-        
+
         test_cases = [
             # Rust库文档
             {
@@ -132,7 +131,7 @@ class MCPToolTester:
                 ]
             }
         ]
-        
+
         for i, params in enumerate(test_cases, 1):
             print(f"\n--- 测试用例 {i} ---")
             try:
@@ -140,11 +139,11 @@ class MCPToolTester:
                 self.print_raw_result("find_library_docs", params, result)
             except Exception as e:
                 print(f"错误: {e}")
-    
+
     async def test_check_versions_exist(self):
         """测试check_versions_exist工具"""
         print("\n✅ 测试 check_versions_exist 工具")
-        
+
         test_cases = [
             # Rust库版本检查
             {
@@ -186,7 +185,7 @@ class MCPToolTester:
                 ]
             }
         ]
-        
+
         for i, params in enumerate(test_cases, 1):
             print(f"\n--- 测试用例 {i} ---")
             try:
@@ -194,11 +193,11 @@ class MCPToolTester:
                 self.print_raw_result("check_versions_exist", params, result)
             except Exception as e:
                 print(f"错误: {e}")
-    
+
     async def test_find_library_dependencies(self):
         """测试find_library_dependencies工具"""
         print("\n🔗 测试 find_library_dependencies 工具")
-        
+
         test_cases = [
             # Rust依赖查找
             {
@@ -234,7 +233,7 @@ class MCPToolTester:
                 ]
             }
         ]
-        
+
         for i, params in enumerate(test_cases, 1):
             print(f"\n--- 测试用例 {i} ---")
             try:
@@ -242,11 +241,11 @@ class MCPToolTester:
                 self.print_raw_result("find_library_dependencies", params, result)
             except Exception as e:
                 print(f"错误: {e}")
-    
+
     async def test_cache_operations(self):
         """测试缓存操作工具"""
         print("\n💾 测试缓存操作工具")
-        
+
         # 测试缓存统计
         print("\n--- 缓存统计 ---")
         try:
@@ -254,11 +253,11 @@ class MCPToolTester:
             self.print_raw_result("get_cache_stats", {}, result)
         except Exception as e:
             print(f"错误: {e}")
-        
+
         # 先执行一些查询以填充缓存
         print("\n--- 执行查询以填充缓存 ---")
         await self.server.find_latest_versions([{"name": "serde", "language": "rust"}])
-        
+
         # 再次查看缓存统计
         print("\n--- 填充后的缓存统计 ---")
         try:
@@ -266,7 +265,7 @@ class MCPToolTester:
             self.print_raw_result("get_cache_stats", {}, result)
         except Exception as e:
             print(f"错误: {e}")
-        
+
         # 测试清空缓存
         print("\n--- 清空缓存 ---")
         try:
@@ -274,7 +273,7 @@ class MCPToolTester:
             self.print_raw_result("clear_cache", {}, result)
         except Exception as e:
             print(f"错误: {e}")
-        
+
         # 清空后的缓存统计
         print("\n--- 清空后的缓存统计 ---")
         try:
@@ -282,11 +281,11 @@ class MCPToolTester:
             self.print_raw_result("get_cache_stats", {}, result)
         except Exception as e:
             print(f"错误: {e}")
-    
+
     async def test_batch_operations(self):
         """测试批量操作"""
         print("\n📦 测试批量操作")
-        
+
         # 大批量测试
         large_batch_libraries = [
             {"name": "serde", "language": "rust"},
@@ -310,18 +309,18 @@ class MCPToolTester:
             {"name": "axios", "language": "node"},
             {"name": "moment", "language": "node"}
         ]
-        
+
         print("\n--- 大批量版本查询 (20个库) ---")
         try:
             result = await self.server.find_latest_versions(large_batch_libraries)
             self.print_raw_result("find_latest_versions (大批量)", {"libraries": large_batch_libraries}, result)
         except Exception as e:
             print(f"错误: {e}")
-    
+
     async def test_error_cases(self):
         """测试错误情况"""
         print("\n❌ 测试错误情况")
-        
+
         error_test_cases = [
             # 不存在的库
             {
@@ -352,12 +351,12 @@ class MCPToolTester:
                 ]
             }
         ]
-        
+
         for i, test_case in enumerate(error_test_cases, 1):
             print(f"\n--- 错误测试用例 {i} ---")
             tool_name = test_case["tool"]
             params = test_case["params"]
-            
+
             try:
                 if tool_name == "find_latest_versions":
                     result = await self.server.find_latest_versions(params)
@@ -365,18 +364,18 @@ class MCPToolTester:
                     result = await self.server.check_versions_exist(params)
                 else:
                     result = "未知工具"
-                
+
                 self.print_raw_result(f"{tool_name} (错误测试)", {"libraries": params}, result)
             except Exception as e:
                 print(f"预期错误: {e}")
                 self.print_raw_result(f"{tool_name} (错误测试)", {"libraries": params}, {"error": str(e)})
-    
+
     async def test_java_only(self):
         """只测试Java相关功能"""
         print("☕ 开始Java Worker专项测试")
         print("📋 测试Java混合方案：Maven Central搜索API + 直接POM访问")
         print("⏰ 测试可能需要几分钟时间，请耐心等待...")
-        
+
         try:
             # 1. 测试find_latest_versions - Java库
             print("\n🔍 测试 find_latest_versions (Java)")
@@ -395,7 +394,7 @@ class MCPToolTester:
                     ]
                 }
             ]
-            
+
             for i, params in enumerate(java_latest_test_cases, 1):
                 print(f"\n--- Java版本查询测试用例 {i} ---")
                 try:
@@ -403,7 +402,7 @@ class MCPToolTester:
                     self.print_raw_result("find_latest_versions (Java)", params, result)
                 except Exception as e:
                     print(f"错误: {e}")
-            
+
             # 2. 测试find_library_docs - Java库
             print("\n📚 测试 find_library_docs (Java)")
             java_docs_test_cases = [
@@ -419,7 +418,7 @@ class MCPToolTester:
                     ]
                 }
             ]
-            
+
             for i, params in enumerate(java_docs_test_cases, 1):
                 print(f"\n--- Java文档查询测试用例 {i} ---")
                 try:
@@ -427,7 +426,7 @@ class MCPToolTester:
                     self.print_raw_result("find_library_docs (Java)", params, result)
                 except Exception as e:
                     print(f"错误: {e}")
-            
+
             # 3. 测试check_versions_exist - Java库
             print("\n✅ 测试 check_versions_exist (Java)")
             java_version_test_cases = [
@@ -450,7 +449,7 @@ class MCPToolTester:
                     ]
                 }
             ]
-            
+
             for i, params in enumerate(java_version_test_cases, 1):
                 print(f"\n--- Java版本存在性测试用例 {i} ---")
                 try:
@@ -458,7 +457,7 @@ class MCPToolTester:
                     self.print_raw_result("check_versions_exist (Java)", params, result)
                 except Exception as e:
                     print(f"错误: {e}")
-            
+
             # 4. 测试find_library_dependencies - Java库
             print("\n🔗 测试 find_library_dependencies (Java)")
             java_deps_test_cases = [
@@ -484,7 +483,7 @@ class MCPToolTester:
                     ]
                 }
             ]
-            
+
             for i, params in enumerate(java_deps_test_cases, 1):
                 print(f"\n--- Java依赖查询测试用例 {i} ---")
                 try:
@@ -492,43 +491,43 @@ class MCPToolTester:
                     self.print_raw_result("find_library_dependencies (Java)", params, result)
                 except Exception as e:
                     print(f"错误: {e}")
-            
+
             print("\n✅ Java专项测试完成！")
             print("📊 测试总结:")
             print("   - find_latest_versions: 测试了Maven Central搜索API获取最新版本")
             print("   - find_library_docs: 测试了文档URL生成")
             print("   - check_versions_exist: 测试了版本存在性检查")
             print("   - find_library_dependencies: 测试了直接POM访问获取依赖信息")
-            
+
         except Exception as e:
             print(f"\n❌ Java测试过程中发生错误: {e}")
             import traceback
             traceback.print_exc()
-    
+
     async def run_all_tests(self):
         """运行所有测试"""
         print("🚀 开始LibraryMaster MCP工具全面功能测试")
         print("📋 测试将输出原始接口结果，不进行任何包装")
         print("⏰ 测试可能需要几分钟时间，请耐心等待...")
-        
+
         try:
             # 测试所有核心工具
             await self.test_find_latest_versions()
             await self.test_find_library_docs()
             await self.test_check_versions_exist()
             await self.test_find_library_dependencies()
-            
+
             # 测试缓存操作
             await self.test_cache_operations()
-            
+
             # 测试批量操作
             await self.test_batch_operations()
-            
+
             # 测试错误情况
             await self.test_error_cases()
-            
+
             print("\n✅ 所有测试完成！")
-            
+
         except Exception as e:
             print(f"\n❌ 测试过程中发生错误: {e}")
             import traceback

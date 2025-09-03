@@ -2,7 +2,8 @@
 
 [中文文档](README_ZH.md) | [API Reference](API_REFERENCE.md) | [Release Notes](RELEASE_NOTES.md)
 
-A powerful MCP (Model Context Protocol) service for time management and timezone operations. TimeMaster provides AI applications with comprehensive time, timezone, and holiday query capabilities through a standardized MCP interface.
+A powerful MCP (Model Context Protocol) service for time management and timezone operations. TimeMaster provides AI
+applications with comprehensive time, timezone, and holiday query capabilities through a standardized MCP interface.
 
 ## Core MCP Features
 
@@ -34,7 +35,8 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 
 ## What's New in v0.1.2
 
-- **🔄 Unified Time Interface**: New `get_time` MCP tool replaces `get_current_time` and `convert_time` with optional parameters
+- **🔄 Unified Time Interface**: New `get_time` MCP tool replaces `get_current_time` and `convert_time` with optional
+  parameters
 - **🌐 Auto Timezone Detection**: MCP service automatically detects timezone (network-first, system fallback)
 - **🔧 Environment Variable Control**: Use `TIMEMASTER_OFFLINE_MODE=true` for offline mode configuration
 - **🔍 Enhanced Search**: `search_timezones` tool now supports empty queries to list all timezones
@@ -46,7 +48,8 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 
 ### MCP Service for AI Integration
 
-TimeMaster provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) service for AI integration using the standard STDIO transport.
+TimeMaster provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) service for AI integration using
+the standard STDIO transport.
 
 ```bash
 # Start MCP service
@@ -71,6 +74,7 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 - **`list_holidays`** - List all holidays for a specific country and year
 
 **Deprecated Tools**
+
 - `get_next_holiday` - ⚠️ Use `search_holiday("")` instead
 - `calculate_days_to_holiday` - ⚠️ Use `search_holiday(holiday_name)` instead
 - `get_current_time` - ⚠️ Use `get_time()` instead
@@ -79,16 +83,19 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 ### MCP Tool Parameters
 
 **`get_time`**
+
 - `timezone` (optional): Target timezone, defaults to local timezone
 - `time_str` (optional): Time string to convert, if not provided gets current time
 - `from_tz` (optional): Source timezone, required when time_str is provided
 - `format` (optional): Output format, 'iso' or 'friendly_cn', defaults to 'iso'
 
 **`search_timezones`**
+
 - `query` (optional): Timezone name search query, empty string returns all timezones
 - `limit` (optional): Maximum number of results to return, defaults to 20
 
 **`search_holiday`**
+
 - `query` (optional): Holiday name search query, empty string returns next holiday
 - `country` (optional): ISO country code (e.g. 'US', 'GB', 'FR')
 - `timezone` (optional): Timezone to infer country from
@@ -96,11 +103,13 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 - `limit` (optional): Maximum number of results to return, defaults to 10
 
 **`list_holidays`**
+
 - `country` (optional): ISO country code
 - `timezone` (optional): Timezone to infer country from
 - `year` (optional): Year, defaults to current year
 
 **`calculate_time_difference`**
+
 - `time1` (required): First time string
 - `tz1` (required): Timezone for first time
 - `time2` (required): Second time string
@@ -171,6 +180,7 @@ TIMEMASTER_DEBUG=true uv run -m time_master.mcp_service
 ### Migration from v0.1.1
 
 **Environment Variable Configuration**
+
 ```bash
 # Old way: force_offline() method (deprecated)
 # New way: Environment variable
@@ -178,6 +188,7 @@ export TIMEMASTER_OFFLINE_MODE=true
 ```
 
 **MCP Tool Migration**
+
 - `get_current_time` → `get_time`
 - `convert_time` → `get_time` with parameters
 - `get_next_holiday` → `search_holiday` with empty query

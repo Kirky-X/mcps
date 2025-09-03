@@ -3,9 +3,9 @@ TimeMaster MCP - A canonical, high-reliability, developer-first modular common c
 for handling timezones and time in Python.
 """
 
+from .config import TimeMasterConfig
 from .core import TimeMaster
 from .exceptions import TimeMasterError, NetworkError, TimezoneError, APIError
-from .config import TimeMasterConfig
 
 __all__ = [
     "TimeMaster",

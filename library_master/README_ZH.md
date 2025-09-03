@@ -2,13 +2,15 @@
 
 [English Documentation](README.md) | [API 参考文档](API_REFERENCE.md) | [版本发布记录](Release.md)
 
-一个强大的 MCP (Model Context Protocol) 服务，用于跨 Python、Node.js、Java、Rust、Go 和 C++ 生态系统的库管理和依赖操作，集成 Context7 API 提供智能库搜索和文档查询功能。
+一个强大的 MCP (Model Context Protocol) 服务，用于跨 Python、Node.js、Java、Rust、Go 和 C++ 生态系统的库管理和依赖操作，集成
+Context7 API 提供智能库搜索和文档查询功能。
 
 > ⚠️ **注意**: 由于网络或 API 限制，Java 接口偶尔可能无法获取。
 
 ## 版本特性 (v0.1.3)
 
 ### 🌟 新增功能
+
 - 🌐 **镜像源配置与故障转移**: 支持多镜像源配置和自动故障转移
 - 🔄 **增强网络重试机制**: 智能重试策略和超时优化
 - 🛡️ **熔断器模式**: 防止级联故障的保护机制
@@ -16,6 +18,7 @@
 - 🌍 **扩展语言支持**: 新增 Go 和 C++ 语言支持
 
 ### 🚀 核心功能
+
 - ✨ **Context7 API 集成**: 智能库搜索和文档查询
 - 🔧 **缓存系统重构**: 使用 cacheout 库提升性能
 - 🛡️ **完全向后兼容**: 现有功能无变化
@@ -80,6 +83,7 @@ LIBRARY_MASTER_CONTEXT7_API_KEY=your_key uv run -m library_master.mcp_service
 ## 可用的 MCP 工具
 
 ### 核心库管理工具
+
 - **`find_latest_versions`** - 查找库的最新版本
 - **`check_versions_exist`** - 验证特定库版本是否存在
 - **`find_library_docs`** - 获取官方文档 URL
@@ -88,6 +92,7 @@ LIBRARY_MASTER_CONTEXT7_API_KEY=your_key uv run -m library_master.mcp_service
 - **`clear_cache`** - 清空缓存数据
 
 ### Context7 智能搜索工具
+
 - **`search_libraries`** - 使用 Context7 API 智能搜索相关库和代码示例
 - **`get_library_docs`** - 使用 Context7 API 获取指定库的详细文档
 

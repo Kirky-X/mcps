@@ -61,6 +61,7 @@ TIMEMASTER_OFFLINE_MODE=true python -m time_master.mcp_service
 - **`list_holidays`** - 列出特定国家和年份的所有节假日
 
 **已废弃的工具 (Deprecated)**
+
 - `get_next_holiday` - ⚠️ 请使用 `search_holiday("")` 替代
 - `calculate_days_to_holiday` - ⚠️ 请使用 `search_holiday(holiday_name)` 替代
 - `get_current_time` - ⚠️ 请使用 `get_time()` 替代
@@ -69,16 +70,19 @@ TIMEMASTER_OFFLINE_MODE=true python -m time_master.mcp_service
 ### MCP 工具参数
 
 **`get_time`**
+
 - `timezone` (可选): 目标时区，默认为本地时区
 - `time_str` (可选): 要转换的时间字符串，如果不提供则获取当前时间
 - `from_tz` (可选): 源时区，当提供time_str时必需
 - `format` (可选): 输出格式，'iso'或'friendly_cn'，默认'iso'
 
 **`search_timezones`**
+
 - `query` (可选): 时区名称搜索查询，空字符串返回所有时区
 - `limit` (可选): 最大返回结果数，默认20
 
 **`search_holiday`**
+
 - `query` (可选): 节假日名称搜索查询，空字符串返回下一个节假日
 - `country` (可选): ISO国家代码 (如 'US', 'GB', 'FR')
 - `timezone` (可选): 用于推断国家的时区
@@ -86,23 +90,30 @@ TIMEMASTER_OFFLINE_MODE=true python -m time_master.mcp_service
 - `limit` (可选): 最大返回结果数，默认10
 
 **`list_holidays`**
+
 - `country` (可选): ISO国家代码
 - `timezone` (可选): 用于推断国家的时区
 - `year` (可选): 年份，默认当前年份
 
 **`calculate_time_difference`**
+
 - `time1` (必需): 第一个时间字符串
 - `tz1` (必需): 第一个时间的时区
 - `time2` (必需): 第二个时间字符串
 - `tz2` (必需): 第二个时间的时区
 
 ### 与 MCP 客户端集成
+
 ```json
 {
   "mcpServers": {
     "time-master": {
       "command": "uv",
-      "args": ["run", "-m", "time_master.mcp_service"],
+      "args": [
+        "run",
+        "-m",
+        "time_master.mcp_service"
+      ],
       "cwd": "/path/to/time-master"
     }
   }

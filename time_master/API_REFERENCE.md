@@ -4,7 +4,8 @@
 
 ## Overview
 
-TimeMaster provides a comprehensive Python API for time and holiday operations. This document covers all available Python interfaces with detailed examples and usage patterns.
+TimeMaster provides a comprehensive Python API for time and holiday operations. This document covers all available
+Python interfaces with detailed examples and usage patterns.
 
 ## Installation
 
@@ -36,6 +37,7 @@ print(holidays[0]['date'])  # "2025-12-25"
 **Function**: Get current time or convert existing time
 
 **Parameters**:
+
 - `timezone` (optional): Target timezone, defaults to local timezone
 - `time_str` (optional): Time string to convert
 - `from_tz` (optional): Source timezone, required when `time_str` is provided
@@ -44,6 +46,7 @@ print(holidays[0]['date'])  # "2025-12-25"
 **Returns**: Formatted time string
 
 **Examples**:
+
 ```python
 # Get current time (local timezone)
 current_time = tm.get_time()
@@ -75,6 +78,7 @@ friendly = tm.get_time(timezone="Asia/Shanghai", format="friendly_cn")
 **Returns**: Local timezone string
 
 **Examples**:
+
 ```python
 local_tz = tm.get_local_timezone()
 # -> "Asia/Shanghai"
@@ -85,12 +89,14 @@ local_tz = tm.get_local_timezone()
 **Function**: Search for matching timezones
 
 **Parameters**:
+
 - `query`: Search query string, empty string returns all timezones
 - `limit` (optional): Limit on number of results returned, defaults to 20
 
 **Returns**: List of matching timezones
 
 **Examples**:
+
 ```python
 # Search for specific timezone
 tokyo_tzs = tm.search_timezones("tokyo")
@@ -110,6 +116,7 @@ all_tzs = tm.search_timezones("", limit=5)
 **Function**: Calculate the difference between two times
 
 **Parameters**:
+
 - `time1`: First time string
 - `tz1`: Timezone for the first time
 - `time2`: Second time string
@@ -118,6 +125,7 @@ all_tzs = tm.search_timezones("", limit=5)
 **Returns**: Time difference string
 
 **Examples**:
+
 ```python
 time_diff = tm.calculate_time_difference(
     time1="2024-01-15T12:00:00",
@@ -135,6 +143,7 @@ time_diff = tm.calculate_time_difference(
 **Function**: Search for holiday information
 
 **Parameters**:
+
 - `query` (optional): Holiday name search, empty string returns next holiday
 - `country` (optional): Country code (e.g., 'US', 'CN')
 - `timezone` (optional): Timezone (for automatic country inference)
@@ -142,6 +151,7 @@ time_diff = tm.calculate_time_difference(
 - `limit` (optional): Limit on number of results returned, defaults to 10
 
 **Returns**: List of holiday information containing the following fields:
+
 - `name`: Holiday name
 - `date`: Date (YYYY-MM-DD)
 - `country`: Country code
@@ -150,6 +160,7 @@ time_diff = tm.calculate_time_difference(
 - `holiday_duration`: Holiday duration in days
 
 **Examples**:
+
 ```python
 # Search for specific holiday
 christmas = tm.search_holiday("Christmas", country="US")
@@ -169,6 +180,7 @@ jp_new_year = tm.search_holiday("New Year", timezone="Asia/Tokyo")
 **Function**: List all holidays for specified country and year
 
 **Parameters**:
+
 - `country` (optional): Country code
 - `timezone` (optional): Timezone (for automatic country inference)
 - `year` (optional): Year, defaults to current year
@@ -176,6 +188,7 @@ jp_new_year = tm.search_holiday("New Year", timezone="Asia/Tokyo")
 **Returns**: List of holiday information
 
 **Examples**:
+
 ```python
 # List US holidays for 2025
 us_holidays = tm.list_holidays(country="US", year=2025)
@@ -195,6 +208,7 @@ local_holidays = tm.list_holidays()
 TimeMaster supports flexible configuration through multiple methods:
 
 ### Environment Variables
+
 ```bash
 # Core configuration
 export TIMEMASTER_API_ENDPOINT="https://worldtimeapi.org/api"
@@ -206,7 +220,9 @@ export TIMEMASTER_AUTO_TIMEZONE="true"  # Enable auto-detection
 ```
 
 ### Configuration File
+
 Create a `config.json` file:
+
 ```json
 {
   "api_endpoint": "https://worldtimeapi.org/api",
@@ -219,6 +235,7 @@ Create a `config.json` file:
 ```
 
 ### Direct Initialization
+
 ```python
 from time-master.core import TimeMaster
 from time-master.config import TimeMasterConfig

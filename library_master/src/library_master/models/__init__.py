@@ -1,8 +1,9 @@
 """数据模型定义"""
 
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Optional, List, Dict, Any
+
+from pydantic import BaseModel, Field
 
 
 class Language(str, Enum):
