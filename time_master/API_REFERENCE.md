@@ -164,15 +164,15 @@ time_diff = tm.calculate_time_difference(
 ```python
 # Search for specific holiday
 christmas = tm.search_holiday("Christmas", country="US")
-# -> [{'name': 'Christmas Day', 'date': '2025-12-25', 'country': 'US', 'year': 2025, 'days_until': 332, 'holiday_duration': 1}]
+# -> [{'name': 'Christmas Day', 'date': '2025-12-25', 'country': 'US', 'year': 2025, 'days_until': 113, 'holiday_duration': 1}]
 
 # Get next holiday
 next_holiday = tm.search_holiday("")
-# -> [{'name': '春节', 'date': '2025-01-29', 'country': 'CN', 'year': 2025, 'days_until': 2, 'holiday_duration': 7}]
+# -> [{'name': '国庆节', 'date': '2025-10-01', 'country': 'CN', 'year': 2025, 'days_until': 28, 'holiday_duration': 7}]
 
 # Automatically infer country through timezone
 jp_new_year = tm.search_holiday("New Year", timezone="Asia/Tokyo")
-# -> [{'name': '元日', 'date': '2025-01-01', 'country': 'JP', 'year': 2025, 'days_until': -26, 'holiday_duration': 1}]
+# -> [{'name': '元日', 'date': '2025-01-01', 'country': 'JP', 'year': 2025, 'days_until': -245, 'holiday_duration': 1}]
 ```
 
 ### 6. list_holidays - Holiday List

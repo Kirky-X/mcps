@@ -55,7 +55,7 @@ days_count = tm.calculate_days_to_holiday("Christmas")  # Returns int
 # Unified format
 holidays = tm.search_holiday("Christmas", country="US")
 # Returns: [{'name': 'Christmas Day', 'date': '2025-12-25', 
-#           'country': 'US', 'year': 2025, 'days_until': 332, 
+#           'country': 'US', 'year': 2025, 'days_until': 113, 
 #           'holiday_duration': 1}]
 ```
 
