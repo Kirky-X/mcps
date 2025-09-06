@@ -17,7 +17,7 @@ class HolidayManager:
     def __init__(self, cache_ttl: int = 3600):
         """
         Initialize HolidayManager.
-        
+
         Args:
             cache_ttl: Cache time-to-live in seconds
         """
@@ -28,7 +28,7 @@ class HolidayManager:
     def _build_timezone_country_mapping(self) -> Dict[str, str]:
         """
         Build a mapping from timezone to country code.
-        
+
         Returns:
             Dictionary mapping timezone names to ISO country codes
         """
@@ -86,10 +86,10 @@ class HolidayManager:
     def get_country_from_timezone(self, timezone: str) -> Optional[str]:
         """
         Get country code from timezone.
-        
+
         Args:
             timezone: Timezone name (e.g., 'America/New_York')
-            
+
         Returns:
             ISO country code or None if not found
         """
@@ -125,11 +125,11 @@ class HolidayManager:
     def get_holidays(self, country: str, year: int = None) -> holidays.HolidayBase:
         """
         Get holidays for a specific country and year.
-        
+
         Args:
             country: ISO country code
             year: Year (default: current year)
-            
+
         Returns:
             Holidays object for the country
         """
@@ -162,11 +162,11 @@ class HolidayManager:
     def get_next_holiday(self, country: str = None, timezone: str = None) -> Optional[Tuple[str, datetime]]:
         """
         Get the next upcoming holiday.
-        
+
         Args:
             country: ISO country code
             timezone: Timezone to infer country from
-            
+
         Returns:
             Tuple of (holiday_name, holiday_date) or None
         """
@@ -200,12 +200,12 @@ class HolidayManager:
     def calculate_days_to_holiday(self, holiday_name: str, country: str = None, timezone: str = None) -> Optional[int]:
         """
         Calculate days until a specific holiday.
-        
+
         Args:
             holiday_name: Name of the holiday to search for
             country: ISO country code
             timezone: Timezone to infer country from
-            
+
         Returns:
             Number of days until the holiday, or None if not found
         """
@@ -243,16 +243,16 @@ class HolidayManager:
         return None
 
     def list_holidays(self, country: str = None, timezone: str = None, year: int = None, limit: int = 10) -> List[
-        Tuple[str, datetime]]:
+            Tuple[str, datetime]]:
         """
         List holidays for a country.
-        
+
         Args:
             country: ISO country code
             timezone: Timezone to infer country from
             year: Year (default: current year)
             limit: Maximum number of holidays to return
-            
+
         Returns:
             List of (holiday_name, holiday_date) tuples
         """
@@ -277,11 +277,11 @@ class HolidayManager:
     def calculate_holiday_duration(self, holiday_date: datetime, country: str) -> int:
         """
         Calculate the duration of consecutive holiday days including weekends.
-        
+
         Args:
             holiday_date: The holiday date
             country: ISO country code
-            
+
         Returns:
             Number of consecutive holiday days (including weekends)
         """
@@ -323,10 +323,10 @@ class HolidayManager:
     def get_country_name(self, country_code: str) -> str:
         """
         Get country name from country code.
-        
+
         Args:
             country_code: ISO country code
-            
+
         Returns:
             Country name
         """

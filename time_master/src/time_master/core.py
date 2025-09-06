@@ -11,7 +11,7 @@ import holidays
 import pytz
 import requests
 from requests.exceptions import RequestException, Timeout
-from thefuzz import process
+
 from tzlocal import get_localzone
 
 from .config import TimeMasterConfig
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class TimeMaster:
     """
-    A canonical, high-reliability, developer-first modular common component 
+    A canonical, high-reliability, developer-first modular common component
     for handling timezones and time in Python.
     """
 
@@ -37,7 +37,7 @@ class TimeMaster:
                  auto_local_timezone: Optional[bool] = None):
         """
         Initialize TimeMaster with configurable parameters.
-        
+
         Args:
             api_endpoint: The World Time API endpoint to use
             timeout: Timeout for API requests in seconds
@@ -67,7 +67,7 @@ class TimeMaster:
             self._auto_local_timezone = self._config.should_auto_detect_timezone()
 
         self._holiday_manager = HolidayManager(cache_ttl=self._config.cache_ttl)
-        
+
         # Initialize Chinese calendar manager
         try:
             self._chinese_calendar = ChineseCalendarManager()
@@ -89,7 +89,7 @@ class TimeMaster:
     def _check_network_connectivity(self) -> bool:
         """
         Check network connectivity by attempting to connect to a reliable endpoint.
-        
+
         Returns:
             bool: True if network is available, False otherwise
         """
@@ -106,13 +106,13 @@ class TimeMaster:
     def _get_online_time(self, timezone: str) -> datetime.datetime:
         """
         Get current time for a timezone using the online API.
-        
+
         Args:
             timezone: IANA timezone string
-            
+
         Returns:
             datetime: Current time in the specified timezone
-            
+
         Raises:
             RequestException: If API request fails
             ValueError: If timezone is invalid
@@ -162,10 +162,10 @@ class TimeMaster:
     def _get_offline_time(self, timezone: str) -> datetime.datetime:
         """
         Get current time for a timezone using the local system.
-        
+
         Args:
             timezone: IANA timezone string
-            
+
         Returns:
             datetime: Current time in the specified timezone
         """
@@ -183,13 +183,13 @@ class TimeMaster:
                  format: str = FORMAT_ISO) -> str:
         """
         Unified time interface that can get current time or convert existing time.
-        
+
         Args:
             timezone: Target timezone (default: local timezone if auto_local_timezone is True, otherwise UTC)
             time_str: Time string to convert (if None, gets current time)
             from_tz: Source timezone for conversion (required if time_str is provided)
             format: Output format (iso, friendly_cn)
-            
+
         Returns:
             Formatted time string
         """
@@ -237,11 +237,11 @@ class TimeMaster:
     def now(self, timezone: str = None, format: str = FORMAT_ISO) -> str:
         """
         Get current time in specified timezone with specified format.
-        
+
         Args:
             timezone: Target timezone (default: local timezone if auto_local_timezone is True, otherwise UTC)
             format: Output format (iso, friendly_cn)
-            
+
         Returns:
             Formatted time string
         """
@@ -250,11 +250,11 @@ class TimeMaster:
     def _format_time(self, dt: datetime.datetime, format: str) -> str:
         """
         Format datetime object according to specified format.
-        
+
         Args:
             dt: Datetime object to format
             format: Format type (iso, friendly_cn)
-            
+
         Returns:
             Formatted time string
         """
@@ -270,11 +270,11 @@ class TimeMaster:
     def convert(self, dt: datetime.datetime, target_timezone: str) -> datetime.datetime:
         """
         Convert a datetime object to a target timezone.
-        
+
         Args:
             dt: Datetime object (naive or timezone-aware)
             target_timezone: Target IANA timezone string
-            
+
         Returns:
             datetime: Converted datetime in target timezone
         """
@@ -303,11 +303,11 @@ class TimeMaster:
     def difference(self, tz1: str, tz2: str) -> datetime.timedelta:
         """
         Calculate the time difference between two timezones.
-        
+
         Args:
             tz1: First IANA timezone string
             tz2: Second IANA timezone string
-            
+
         Returns:
             timedelta: Time difference between the two timezones
         """
@@ -342,11 +342,11 @@ class TimeMaster:
         """
         Find timezones matching the query using fuzzy search.
         If query is empty or whitespace, return all timezones.
-        
+
         Args:
             query: Search query string
             limit: Maximum number of results to return
-            
+
         Returns:
             List of matching timezone names
         """
@@ -363,9 +363,9 @@ class TimeMaster:
         for tz in pytz.all_timezones:
             tz_lower = tz.lower()
             # Check both original query and underscore version
-            if (query_lower in tz_lower or
-                    query_underscore in tz_lower or
-                    query_lower in tz_lower.replace("_", " ")):
+            if (query_lower in tz_lower
+                    or query_underscore in tz_lower
+                    or query_lower in tz_lower.replace("_", " ")):
                 matches.append(tz)
                 if len(matches) >= limit:
                     break
@@ -375,10 +375,10 @@ class TimeMaster:
     def list_timezones(self, region: str = "") -> List[str]:
         """
         List all available timezones, optionally filtered by region.
-        
+
         Args:
             region: Optional region filter (e.g., 'America', 'Europe')
-            
+
         Returns:
             List of timezone names
         """
@@ -393,7 +393,7 @@ class TimeMaster:
     def _auto_detect_local_timezone(self) -> str:
         """
         Auto-detect local timezone with network fallback.
-        
+
         Returns:
             Detected local timezone name
         """
@@ -425,7 +425,7 @@ class TimeMaster:
     def get_local_timezone(self) -> str:
         """
         Get the local system timezone.
-        
+
         Returns:
             Local timezone name (e.g., 'America/New_York')
         """
@@ -445,11 +445,11 @@ class TimeMaster:
     def get_next_holiday(self, country: str = None, timezone: str = None):
         """
         Get the next upcoming holiday.
-        
+
         Args:
             country: ISO country code
             timezone: Timezone to infer country from (defaults to local timezone)
-            
+
         Returns:
             Dictionary with holiday information including days_until or None if no upcoming holidays
         """
@@ -496,12 +496,12 @@ class TimeMaster:
     def calculate_days_to_holiday(self, holiday_name: str, country: str = None, timezone: str = None):
         """
         Calculate days until a specific holiday.
-        
+
         Args:
             holiday_name: Name of the holiday to search for
             country: ISO country code
             timezone: Timezone to infer country from (defaults to local timezone)
-            
+
         Returns:
             Number of days until the holiday, or None if not found
         """
@@ -513,12 +513,12 @@ class TimeMaster:
     def list_holidays(self, country: str = None, timezone: str = None, year: int = None):
         """
         List all holidays for a specific country and year.
-        
+
         Args:
             country: ISO country code
             timezone: Timezone to infer country from (defaults to local timezone)
             year: Year (default: current year)
-            
+
         Returns:
             List of holiday dictionaries for the entire year
         """
@@ -562,14 +562,14 @@ class TimeMaster:
                        limit: int = 10):
         """
         Search for holidays by name. If query is empty, returns the next upcoming holiday.
-        
+
         Args:
             query: Search query for holiday names (empty string returns next holiday)
             country: ISO country code
             timezone: Timezone to infer country from (defaults to local timezone)
             year: Year (default: current year)
             limit: Maximum number of results to return
-            
+
         Returns:
             List of matching holiday dictionaries with days_until field
         """
@@ -615,10 +615,10 @@ class TimeMaster:
     def get_country_from_timezone(self, timezone: str = None):
         """
         Get country code from timezone.
-        
+
         Args:
             timezone: Timezone name (defaults to local timezone)
-            
+
         Returns:
             ISO country code or None if not found
         """
@@ -631,12 +631,12 @@ class TimeMaster:
     def get_chinese_calendar_info(self, date_input):
         """
         Get comprehensive Chinese calendar information for a given date.
-        
+
         This is the main unified interface that provides all Chinese calendar data.
-        
+
         Args:
             date_input: Date (datetime, date object, or string in YYYY-MM-DD format)
-            
+
         Returns:
             Dictionary containing complete Chinese calendar information including:
                 - Basic lunar date info
@@ -653,10 +653,10 @@ class TimeMaster:
     def gregorian_to_lunar(self, date_input):
         """
         Convert Gregorian date to Chinese lunar date (simplified interface).
-        
+
         Args:
             date_input: Gregorian date (datetime, date object, or string in YYYY-MM-DD format)
-            
+
         Returns:
             Dictionary containing lunar date information
         """
@@ -667,13 +667,13 @@ class TimeMaster:
     def lunar_to_gregorian(self, lunar_year: int, lunar_month: int, lunar_day: int, is_leap_month: bool = False):
         """
         Convert Chinese lunar date to Gregorian date (simplified interface).
-        
+
         Args:
             lunar_year: Lunar year
             lunar_month: Lunar month (1-12)
             lunar_day: Lunar day (1-30)
             is_leap_month: Whether it's a leap month
-            
+
         Returns:
             Dictionary containing Gregorian date information
         """
@@ -684,56 +684,56 @@ class TimeMaster:
     def get_solar_terms(self, year: int):
         """
         Get solar terms for a specific year (simplified interface).
-        
+
         Args:
             year: Year to get solar terms for
-            
+
         Returns:
             Dictionary containing solar terms information
         """
         if not self._chinese_calendar_available:
             raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
         return self._chinese_calendar.get_solar_terms(year)
-    
+
     def get_zodiac(self, year: int):
         """
         Get Chinese zodiac for a specific year (simplified interface).
-        
+
         Args:
             year: Year to get zodiac for
-            
+
         Returns:
             Dictionary containing zodiac information
         """
         if not self._chinese_calendar_available:
             raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
         return self._chinese_calendar.get_zodiac(year)
-    
+
     # Legacy method for backward compatibility
     def get_ganzhi(self, date_input):
         """
         Get Heavenly Stems and Earthly Branches (Ganzhi) for a given date.
-        
+
         This method is deprecated. Use get_chinese_calendar_info() for comprehensive data.
-        
+
         Args:
             date_input: Date (datetime, date object, or string in YYYY-MM-DD format)
-            
+
         Returns:
             Dictionary containing Ganzhi information from comprehensive calendar data
         """
         if not self._chinese_calendar_available:
             raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
-        
+
         info = self._chinese_calendar.get_chinese_calendar_info(date_input)
         if 'error' in info:
             return info
-        
+
         return {
-             'year_ganzhi': info['ganzhi']['year'],
-             'month_ganzhi': info['ganzhi']['month'],
-             'day_ganzhi': info['ganzhi']['day'],
-             'hour_ganzhi': info['ganzhi']['hour'],
-             'full_bazi': info['ganzhi']['full_bazi'],
-             'date': info['gregorian_date']
-         }
+            'year_ganzhi': info['ganzhi']['year'],
+            'month_ganzhi': info['ganzhi']['month'],
+            'day_ganzhi': info['ganzhi']['day'],
+            'hour_ganzhi': info['ganzhi']['hour'],
+            'full_bazi': info['ganzhi']['full_bazi'],
+            'date': info['gregorian_date']
+        }

@@ -112,7 +112,8 @@ async def list_tools() -> List[Tool]:
 
         Tool(
             name="search_holiday",
-            description="Search for holidays by name. Returns holiday date and days until. If query is empty, returns next upcoming holiday.",
+            description=("Search for holidays by name. Returns holiday date and days until. "
+                         "If query is empty, returns next upcoming holiday."),
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -203,7 +204,7 @@ async def list_tools() -> List[Tool]:
                     "is_leap_month": {
                         "type": "boolean",
                         "description": "Whether it's a leap month (default: false)",
-                        "default": false
+                        "default": False
                     }
                 },
                 "required": ["lunar_year", "lunar_month", "lunar_day"]
@@ -329,16 +330,23 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
 
             if time_str:
                 actual_timezone = timezone if timezone else timemaster.get_local_timezone()
-                return [TextContent(type="text", text=f"Converted time: {result} ({actual_timezone})")]
+                return [
+                    TextContent(
+                        type="text",
+                        text=f"Converted time: {result} ({actual_timezone})")]
             else:
                 actual_timezone = timezone if timezone else timemaster.get_local_timezone()
-                return [TextContent(type="text", text=f"Current time in {actual_timezone}: {result}")]
-
-
+                return [
+                    TextContent(
+                        type="text",
+                        text=f"Current time in {actual_timezone}: {result}")]
 
         elif name == "get_local_timezone":
             local_tz = timemaster.get_local_timezone()
-            return [TextContent(type="text", text=f"Local timezone: {local_tz}")]
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Local timezone: {local_tz}")]
 
         elif name == "search_timezones":
             query = arguments.get("query", "")
@@ -347,27 +355,33 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             if matches:
                 result = "\n".join([f"- {tz}" for tz in matches])
                 if query:
-                    return [TextContent(type="text", text=f"Matching timezones for '{query}':\n{result}")]
+                    return [
+                        TextContent(
+                            type="text",
+                            text=f"Matching timezones for '{query}':\n{result}")]
                 else:
                     total_count = len(list(pytz.all_timezones))
-                    suffix = f"\n... and {total_count - len(matches)} more" if len(matches) < total_count else ""
-                    return [TextContent(type="text", text=f"All timezones (showing {len(matches)}):\n{result}{suffix}")]
+                    suffix = f"\n... and {
+                        total_count - len(matches)} more" if len(matches) < total_count else ""
+                    return [
+                        TextContent(
+                            type="text",
+                            text=f"All timezones (showing {
+                                len(matches)}):\n{result}{suffix}")]
             else:
-                return [TextContent(type="text", text=f"No timezones found matching '{query}'")]
-
-
-
-
+                return [
+                    TextContent(
+                        type="text",
+                        text=f"No timezones found matching '{query}'")]
 
         elif name == "calculate_time_difference":
             tz1 = arguments["tz1"]
             tz2 = arguments["tz2"]
             diff = timemaster.difference(tz1, tz2)
-            return [TextContent(type="text", text=f"Time difference between {tz1} and {tz2}: {diff}")]
-
-
-
-
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Time difference between {tz1} and {tz2}: {diff}")]
 
         elif name == "search_holiday":
             query = arguments.get("query", "")
@@ -383,7 +397,12 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 year=year,
                 limit=limit
             )
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "list_holidays":
             country = arguments.get("country", "")
@@ -395,13 +414,23 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 timezone=timezone if timezone else None,
                 year=year
             )
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         # Chinese Calendar Tools
         elif name == "gregorian_to_lunar":
             date_str = arguments["date"]
             result = timemaster.gregorian_to_lunar(date_str)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "lunar_to_gregorian":
             year = arguments["year"]
@@ -409,49 +438,93 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             day = arguments["day"]
             leap = arguments.get("leap", False)
             result = timemaster.lunar_to_gregorian(year, month, day, leap)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_ganzhi":
             date_str = arguments["date"]
             result = timemaster.get_ganzhi(date_str)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_solar_terms":
             year = arguments["year"]
             result = timemaster.get_solar_terms(year)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_zodiac":
             year = arguments["year"]
             result = timemaster.get_zodiac(year)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_chinese_holidays":
             year = arguments["year"]
             result = timemaster.get_chinese_holidays(year)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_almanac_info":
             date_str = arguments["date"]
             result = timemaster.get_almanac_info(date_str)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "is_chinese_holiday":
             date_str = arguments["date"]
             result = timemaster.is_chinese_holiday(date_str)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         elif name == "get_lunar_month_info":
             year = arguments["year"]
             month = arguments["month"]
             result = timemaster.get_lunar_month_info(year, month)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            return [
+                TextContent(
+                    type="text",
+                    text=json.dumps(
+                        result,
+                        indent=2))]
 
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
 
     except Exception as e:
-        return [TextContent(type="text", text=f"Error executing tool '{name}': {str(e)}")]
+        return [
+            TextContent(
+                type="text",
+                text=f"Error executing tool '{name}': {
+                    str(e)}")]
 
 
 def setup_working_directory():

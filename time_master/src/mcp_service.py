@@ -191,8 +191,6 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 actual_timezone = timezone if timezone else timemaster.get_local_timezone()
                 return [TextContent(type="text", text=f"Current time in {actual_timezone}: {result}")]
 
-
-
         elif name == "get_local_timezone":
             local_tz = timemaster.get_local_timezone()
             return [TextContent(type="text", text=f"Local timezone: {local_tz}")]
@@ -212,19 +210,11 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             else:
                 return [TextContent(type="text", text=f"No timezones found matching '{query}'")]
 
-
-
-
-
         elif name == "calculate_time_difference":
             tz1 = arguments["tz1"]
             tz2 = arguments["tz2"]
             diff = timemaster.difference(tz1, tz2)
             return [TextContent(type="text", text=f"Time difference between {tz1} and {tz2}: {diff}")]
-
-
-
-
 
         elif name == "search_holiday":
             query = arguments.get("query", "")
