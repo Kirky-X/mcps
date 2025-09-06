@@ -4,7 +4,40 @@
 
 ## Version History
 
-### v0.1.2 (Latest)
+### v2.0.0 (Latest)
+
+#### 🏮 Chinese Calendar Integration
+
+**Complete Chinese Lunar Calendar System**
+- **NEW**: `get_chinese_calendar_info()` - Unified interface for comprehensive Chinese calendar data
+- **NEW**: `gregorian_to_lunar()` and `lunar_to_gregorian()` - Bi-directional calendar conversion
+- **NEW**: `get_ganzhi()` - Traditional Chinese stem-branch (天干地支) chronology system
+- **NEW**: `get_solar_terms()` - 24 solar terms query for any year
+- **NEW**: `get_zodiac()` - Chinese zodiac animal calculation
+- **NEW**: `get_almanac()` - Traditional Chinese almanac (黄历) information
+
+**Enhanced Cultural Features**
+- **NEW**: Complete lunar calendar support with leap month handling
+- **NEW**: Traditional Chinese festivals and solar terms
+- **NEW**: Ganzhi (stem-branch) system for years, months, days, and hours
+- **NEW**: Chinese zodiac animals with clash information
+- **NEW**: Traditional almanac with suitable/unsuitable activities
+
+**Technical Improvements**
+- **NEW**: Integration with cnlunar library for accurate calculations
+- **NEW**: Support for date range 1900-2100
+- **NEW**: High-performance caching and optimization
+- **NEW**: Thread-safe operations for concurrent usage
+- **NEW**: Comprehensive error handling and validation
+
+#### 🔄 Unified API Enhancement
+
+**Unified Time Interface (Enhanced)**
+- **IMPROVED**: `get_time()` method with enhanced Chinese calendar support
+- **NEW**: Chinese calendar format options in time operations
+- Backward compatible with existing code
+
+### v0.1.2
 
 #### 🔄 Major API Changes
 
@@ -180,27 +213,34 @@ local_tz = tm.get_local_timezone()
 
 ## Compatibility Matrix
 
-| Feature | v0.1.0 | v0.1.1 | v0.1.2 |
-|---------|--------|--------|--------|
-| Basic time operations | ✅ | ✅ | ✅ |
-| Timezone conversion | ✅ | ✅ | ✅ |
-| Auto timezone detection | ❌ | ✅ | ✅ |
-| Holiday queries | ❌ | ✅ | ✅ |
-| Unified time interface | ❌ | ❌ | ✅ |
-| Environment config | ❌ | ❌ | ✅ |
-| Holiday search | ❌ | ❌ | ✅ |
-| MCP service | ✅ | ✅ | ✅ |
-| Command line | ✅ | ✅ | ✅ |
+| Feature | v0.1.0 | v0.1.1 | v0.1.2 | v2.0.0 |
+|---------|--------|--------|--------|--------|
+| Basic time operations | ✅ | ✅ | ✅ | ✅ |
+| Timezone conversion | ✅ | ✅ | ✅ | ✅ |
+| Auto timezone detection | ❌ | ✅ | ✅ | ✅ |
+| Holiday queries | ❌ | ✅ | ✅ | ✅ |
+| Unified time interface | ❌ | ❌ | ✅ | ✅ |
+| Environment config | ❌ | ❌ | ✅ | ✅ |
+| Holiday search | ❌ | ❌ | ✅ | ✅ |
+| Chinese calendar system | ❌ | ❌ | ❌ | ✅ |
+| Lunar calendar conversion | ❌ | ❌ | ❌ | ✅ |
+| Ganzhi (stem-branch) | ❌ | ❌ | ❌ | ✅ |
+| Solar terms | ❌ | ❌ | ❌ | ✅ |
+| Chinese zodiac | ❌ | ❌ | ❌ | ✅ |
+| Traditional almanac | ❌ | ❌ | ❌ | ✅ |
+| MCP service | ✅ | ✅ | ✅ | ✅ |
+| Command line | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
 ## Support Policy
 
-- **Current Version (v0.1.2)**: Full support and active development
-- **Previous Version (v0.1.1)**: Security updates only
-- **Legacy Version (v0.1.0)**: End of life, upgrade recommended
+- **Current Version (v2.0.0)**: Full support and active development
+- **Previous Version (v0.1.2)**: Security updates only
+- **Legacy Versions (v0.1.1, v0.1.0)**: End of life, upgrade recommended
 
 **Deprecation Timeline:**
-- Deprecated methods in v0.1.2 will be removed in v0.2.0
+- Deprecated methods in v0.1.2 will be removed in v3.0.0
 - Migration warnings will be shown for 2 major versions
 - Breaking changes will be clearly documented and communicated
+- Chinese calendar features are stable and will maintain backward compatibility

@@ -10,6 +10,9 @@ applications with comprehensive time, timezone, and holiday query capabilities t
 - **Unified Time Operations** - Get current time, convert between timezones with single interface
 - **Smart Timezone Management** - Automatic detection, search, and conversion capabilities
 - **Comprehensive Holiday Support** - Query holidays by name, country, and date ranges
+- **🆕 Chinese Calendar System** - Complete lunar calendar, zodiac, solar terms, and almanac support
+- **🆕 Ganzhi (Stem-Branch) Calculation** - Traditional Chinese chronology system
+- **🆕 Solar Terms & Festivals** - 24 solar terms and traditional Chinese holidays
 - **AI-Ready Integration** - Standardized MCP protocol for seamless AI application integration
 - **Flexible Configuration** - Environment variables and configuration files support
 - **Offline Mode Support** - Works without internet connection using system data
@@ -33,10 +36,14 @@ uv run -m time_master.mcp_service
 TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 ```
 
-## What's New in v0.1.2
+## What's New in v2.0.0
 
-- **🔄 Unified Time Interface**: New `get_time` MCP tool replaces `get_current_time` and `convert_time` with optional
-  parameters
+- **🏮 Chinese Calendar Integration**: Complete Chinese lunar calendar system with cnlunar library
+- **🐉 Zodiac & Ganzhi Support**: Traditional Chinese zodiac animals and stem-branch chronology
+- **🌸 Solar Terms & Almanac**: 24 solar terms and traditional Chinese almanac (黄历) information
+- **📅 Bi-directional Conversion**: Convert between Gregorian and lunar calendar dates
+- **🎯 Unified Interface**: Single `get_chinese_calendar_info` tool for comprehensive Chinese calendar data
+- **🔄 Unified Time Interface**: New `get_time` MCP tool replaces `get_current_time` and `convert_time` with optional parameters
 - **🌐 Auto Timezone Detection**: MCP service automatically detects timezone (network-first, system fallback)
 - **🔧 Environment Variable Control**: Use `TIMEMASTER_OFFLINE_MODE=true` for offline mode configuration
 - **🔍 Enhanced Search**: `search_timezones` tool now supports empty queries to list all timezones
@@ -72,6 +79,16 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 
 - **`search_holiday`** - Search holidays by name, returns date, days until, and holiday duration
 - **`list_holidays`** - List all holidays for a specific country and year
+
+**Chinese Calendar Tools (v2.0.0+)**
+
+- **`get_chinese_calendar_info`** - Get comprehensive Chinese calendar information for any date
+- **`gregorian_to_lunar`** - Convert Gregorian date to lunar calendar
+- **`lunar_to_gregorian`** - Convert lunar date to Gregorian calendar
+- **`get_ganzhi`** - Get traditional Chinese stem-branch (天干地支) information
+- **`get_solar_terms`** - Get 24 solar terms for a specific year
+- **`get_zodiac`** - Get Chinese zodiac animal for a specific year
+- **`get_almanac`** - Get traditional Chinese almanac (黄历) information
 
 **Deprecated Tools**
 
@@ -115,6 +132,39 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 - `time2` (required): Second time string
 - `tz2` (required): Timezone for second time
 
+**Chinese Calendar Tool Parameters**
+
+**`get_chinese_calendar_info`**
+
+- `date_input` (required): Date in 'YYYY-MM-DD' format, datetime object, or date object
+
+**`gregorian_to_lunar`**
+
+- `date_input` (required): Gregorian date to convert
+
+**`lunar_to_gregorian`**
+
+- `lunar_year` (required): Lunar year
+- `lunar_month` (required): Lunar month
+- `lunar_day` (required): Lunar day
+- `is_leap_month` (optional): Whether it's a leap month, defaults to false
+
+**`get_ganzhi`**
+
+- `date_input` (required): Date for stem-branch calculation
+
+**`get_solar_terms`**
+
+- `year` (required): Year for solar terms query
+
+**`get_zodiac`**
+
+- `year` (required): Year for zodiac query
+
+**`get_almanac`**
+
+- `date_input` (required): Date for almanac information
+
 ### Integration with MCP Clients
 
 ```json
@@ -131,6 +181,8 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
 
 ### Example MCP Tool Usage
 
+**Time Operations**
+
 ```json
 {
   "method": "tools/call",
@@ -139,6 +191,46 @@ TIMEMASTER_OFFLINE_MODE=true uv run -m time_master.mcp_service
     "arguments": {
       "timezone": "America/New_York",
       "format": "iso"
+    }
+  }
+}
+```
+
+**Chinese Calendar Operations**
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_chinese_calendar_info",
+    "arguments": {
+      "date_input": "2024-02-10"
+    }
+  }
+}
+```
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "lunar_to_gregorian",
+    "arguments": {
+      "lunar_year": 2024,
+      "lunar_month": 1,
+      "lunar_day": 1
+    }
+  }
+}
+```
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "get_zodiac",
+    "arguments": {
+      "year": 2024
     }
   }
 }

@@ -16,6 +16,7 @@ from tzlocal import get_localzone
 
 from .config import TimeMasterConfig
 from .holiday_manager import HolidayManager
+from .chinese_calendar import ChineseCalendarManager
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -66,6 +67,15 @@ class TimeMaster:
             self._auto_local_timezone = self._config.should_auto_detect_timezone()
 
         self._holiday_manager = HolidayManager(cache_ttl=self._config.cache_ttl)
+        
+        # Initialize Chinese calendar manager
+        try:
+            self._chinese_calendar = ChineseCalendarManager()
+            self._chinese_calendar_available = True
+        except ImportError:
+            self._chinese_calendar = None
+            self._chinese_calendar_available = False
+            logger.warning("Chinese calendar features disabled: cnlunar library not found")
 
         # Auto-detect local timezone if enabled
         if self._auto_local_timezone:
@@ -616,3 +626,114 @@ class TimeMaster:
             timezone = self.get_local_timezone()
 
         return self._holiday_manager.get_country_from_timezone(timezone)
+
+    # Chinese Calendar Methods
+    def get_chinese_calendar_info(self, date_input):
+        """
+        Get comprehensive Chinese calendar information for a given date.
+        
+        This is the main unified interface that provides all Chinese calendar data.
+        
+        Args:
+            date_input: Date (datetime, date object, or string in YYYY-MM-DD format)
+            
+        Returns:
+            Dictionary containing complete Chinese calendar information including:
+                - Basic lunar date info
+                - Ganzhi (Four Pillars)
+                - Zodiac information
+                - Solar terms
+                - Almanac info (Yi/Ji)
+                - Holiday information
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        return self._chinese_calendar.get_chinese_calendar_info(date_input)
+
+    def gregorian_to_lunar(self, date_input):
+        """
+        Convert Gregorian date to Chinese lunar date (simplified interface).
+        
+        Args:
+            date_input: Gregorian date (datetime, date object, or string in YYYY-MM-DD format)
+            
+        Returns:
+            Dictionary containing lunar date information
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        return self._chinese_calendar.gregorian_to_lunar(date_input)
+
+    def lunar_to_gregorian(self, lunar_year: int, lunar_month: int, lunar_day: int, is_leap_month: bool = False):
+        """
+        Convert Chinese lunar date to Gregorian date (simplified interface).
+        
+        Args:
+            lunar_year: Lunar year
+            lunar_month: Lunar month (1-12)
+            lunar_day: Lunar day (1-30)
+            is_leap_month: Whether it's a leap month
+            
+        Returns:
+            Dictionary containing Gregorian date information
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        return self._chinese_calendar.lunar_to_gregorian(lunar_year, lunar_month, lunar_day, is_leap_month)
+
+    def get_solar_terms(self, year: int):
+        """
+        Get solar terms for a specific year (simplified interface).
+        
+        Args:
+            year: Year to get solar terms for
+            
+        Returns:
+            Dictionary containing solar terms information
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        return self._chinese_calendar.get_solar_terms(year)
+    
+    def get_zodiac(self, year: int):
+        """
+        Get Chinese zodiac for a specific year (simplified interface).
+        
+        Args:
+            year: Year to get zodiac for
+            
+        Returns:
+            Dictionary containing zodiac information
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        return self._chinese_calendar.get_zodiac(year)
+    
+    # Legacy method for backward compatibility
+    def get_ganzhi(self, date_input):
+        """
+        Get Heavenly Stems and Earthly Branches (Ganzhi) for a given date.
+        
+        This method is deprecated. Use get_chinese_calendar_info() for comprehensive data.
+        
+        Args:
+            date_input: Date (datetime, date object, or string in YYYY-MM-DD format)
+            
+        Returns:
+            Dictionary containing Ganzhi information from comprehensive calendar data
+        """
+        if not self._chinese_calendar_available:
+            raise RuntimeError("Chinese calendar features are not available. Please install cnlunar library.")
+        
+        info = self._chinese_calendar.get_chinese_calendar_info(date_input)
+        if 'error' in info:
+            return info
+        
+        return {
+             'year_ganzhi': info['ganzhi']['year'],
+             'month_ganzhi': info['ganzhi']['month'],
+             'day_ganzhi': info['ganzhi']['day'],
+             'hour_ganzhi': info['ganzhi']['hour'],
+             'full_bazi': info['ganzhi']['full_bazi'],
+             'date': info['gregorian_date']
+         }

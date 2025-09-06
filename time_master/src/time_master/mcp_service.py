@@ -165,6 +165,147 @@ async def list_tools() -> List[Tool]:
                     }
                 }
             }
+        ),
+
+        # Chinese Calendar Tools
+        Tool(
+            name="gregorian_to_lunar",
+            description="Convert Gregorian date to Chinese lunar date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Gregorian date in YYYY-MM-DD format (default: today)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="lunar_to_gregorian",
+            description="Convert Chinese lunar date to Gregorian date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "lunar_year": {
+                        "type": "integer",
+                        "description": "Lunar year"
+                    },
+                    "lunar_month": {
+                        "type": "integer",
+                        "description": "Lunar month (1-12)"
+                    },
+                    "lunar_day": {
+                        "type": "integer",
+                        "description": "Lunar day (1-30)"
+                    },
+                    "is_leap_month": {
+                        "type": "boolean",
+                        "description": "Whether it's a leap month (default: false)",
+                        "default": false
+                    }
+                },
+                "required": ["lunar_year", "lunar_month", "lunar_day"]
+            }
+        ),
+
+        Tool(
+            name="get_ganzhi",
+            description="Get Heavenly Stems and Earthly Branches (Ganzhi/Four Pillars) for a date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Date in YYYY-MM-DD format (default: today)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_solar_terms",
+            description="Get all 24 solar terms for a given year",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "description": "Year to get solar terms for (default: current year)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_next_solar_term",
+            description="Get the next solar term from a given date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Starting date in YYYY-MM-DD format (default: today)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_zodiac",
+            description="Get Chinese zodiac animal for a given date or year",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date_or_year": {
+                        "type": "string",
+                        "description": "Date in YYYY-MM-DD format or year as string (default: current year)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_chinese_holidays",
+            description="Get Chinese traditional holidays for a given year",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "year": {
+                        "type": "integer",
+                        "description": "Year to get Chinese holidays for (default: current year)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_almanac_info",
+            description="Get Chinese almanac information (suitable and unsuitable activities) for a date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Date in YYYY-MM-DD format (default: today)"
+                    }
+                }
+            }
+        ),
+
+        Tool(
+            name="get_comprehensive_chinese_info",
+            description="Get comprehensive Chinese calendar information for a given date",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Date in YYYY-MM-DD format (default: today)"
+                    }
+                }
+            }
         )
     ]
 
@@ -254,6 +395,56 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 timezone=timezone if timezone else None,
                 year=year
             )
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        # Chinese Calendar Tools
+        elif name == "gregorian_to_lunar":
+            date_str = arguments["date"]
+            result = timemaster.gregorian_to_lunar(date_str)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "lunar_to_gregorian":
+            year = arguments["year"]
+            month = arguments["month"]
+            day = arguments["day"]
+            leap = arguments.get("leap", False)
+            result = timemaster.lunar_to_gregorian(year, month, day, leap)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_ganzhi":
+            date_str = arguments["date"]
+            result = timemaster.get_ganzhi(date_str)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_solar_terms":
+            year = arguments["year"]
+            result = timemaster.get_solar_terms(year)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_zodiac":
+            year = arguments["year"]
+            result = timemaster.get_zodiac(year)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_chinese_holidays":
+            year = arguments["year"]
+            result = timemaster.get_chinese_holidays(year)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_almanac_info":
+            date_str = arguments["date"]
+            result = timemaster.get_almanac_info(date_str)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "is_chinese_holiday":
+            date_str = arguments["date"]
+            result = timemaster.is_chinese_holiday(date_str)
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+        elif name == "get_lunar_month_info":
+            year = arguments["year"]
+            month = arguments["month"]
+            result = timemaster.get_lunar_month_info(year, month)
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         else:
