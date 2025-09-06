@@ -8,9 +8,17 @@ queries.
 
 > ⚠️ **Notice**: Java interfaces may occasionally fail to retrieve due to network or API limitations.
 
-## Version Features (v0.1.3)
+## Version Features (v0.1.4)
 
-### 🌟 New Features
+### 🧹 Project Optimization & Cleanup
+
+- 🗂️ **Code Structure Optimization**: Removed debug scripts and redundant files, streamlined project structure
+- 🧽 **Cache Cleanup**: Comprehensive cleanup of temporary files and compilation cache, improved performance
+- ✅ **Quality Verification**: All 69 test cases passed, ensuring functional integrity
+- 📁 **Directory Organization**: Optimized project directory structure, enhanced code maintainability
+- 🚀 **Performance Enhancement**: Reduced disk usage, optimized loading speed
+
+### 🌟 Core Features (Inherited from v0.1.3)
 
 - 🌐 **Mirror Source Configuration & Failover**: Support for multiple mirror sources with automatic failover
 - 🔄 **Enhanced Network Retry Mechanism**: Intelligent retry strategies and timeout optimization
