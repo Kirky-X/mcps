@@ -1,4 +1,4 @@
-# TimeMaster MCP
+# TimeMaster v0.1.3 - 时间管理大师
 
 [English Documentation](README.md) | [API参考文档](API_REFERENCE.md) | [版本说明](Release.md)
 

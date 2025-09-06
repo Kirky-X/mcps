@@ -4,7 +4,7 @@
 
 ## Version History
 
-### v2.0.0 (Latest)
+### v0.1.3 (Latest)
 
 #### 🏮 Chinese Calendar Integration
 
@@ -213,7 +213,7 @@ local_tz = tm.get_local_timezone()
 
 ## Compatibility Matrix
 
-| Feature | v0.1.0 | v0.1.1 | v0.1.2 | v2.0.0 |
+| Feature | v0.1.0 | v0.1.1 | v0.1.2 | v0.1.3 |
 |---------|--------|--------|--------|--------|
 | Basic time operations | ✅ | ✅ | ✅ | ✅ |
 | Timezone conversion | ✅ | ✅ | ✅ | ✅ |
@@ -235,7 +235,7 @@ local_tz = tm.get_local_timezone()
 
 ## Support Policy
 
-- **Current Version (v2.0.0)**: Full support and active development
+- **Current Version (v0.1.3)**: Full support and active development
 - **Previous Version (v0.1.2)**: Security updates only
 - **Legacy Versions (v0.1.1, v0.1.0)**: End of life, upgrade recommended
 

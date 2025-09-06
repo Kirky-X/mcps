@@ -1,4 +1,4 @@
-# TimeMaster MCP
+# TimeMaster MCP v0.1.3
 
 [中文文档](README_ZH.md) | [API Reference](API_REFERENCE.md) | [Release Notes](RELEASE_NOTES.md)
 
