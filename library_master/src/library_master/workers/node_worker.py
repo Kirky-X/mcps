@@ -10,11 +10,11 @@ from ..exceptions import LibraryNotFoundError
 class NodeWorker(BaseWorker):
     """Node.js语言Worker - 处理NPM查询"""
 
-    def __init__(self, timeout: float = 30.0):
+    def __init__(self, timeout: float = 120.0):
         super().__init__(Language.NODE, timeout)
 
     def _get_base_url(self) -> str:
-        return "https://registry.npmjs.org"
+        return "https://registry.npmmirror.com"
 
     def get_latest_version(self, library: str) -> Dict[str, Any]:
         """获取Node.js包的最新版本"""

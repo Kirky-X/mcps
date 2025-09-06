@@ -37,7 +37,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 "language": {
                                     "type": "string",
                                     "enum": ["rust", "python", "java", "node", "go", "cpp"],
-                                    "description": "编程语言"
+                                    "description": "编程语言。支持别名：JavaScript/TypeScript/js/ts → node, C/c → cpp。系统会自动处理常见的误识别情况。"
                                 }
                             },
                             "required": ["name", "language"]
@@ -66,7 +66,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 "language": {
                                     "type": "string",
                                     "enum": ["rust", "python", "java", "node", "go", "cpp"],
-                                    "description": "编程语言"
+                                    "description": "编程语言。支持别名：JavaScript/TypeScript/js/ts → node, C/c → cpp。系统会自动处理常见的误识别情况。"
                                 },
                                 "version": {
                                     "type": "string",
@@ -99,7 +99,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 "language": {
                                     "type": "string",
                                     "enum": ["rust", "python", "java", "node", "go", "cpp"],
-                                    "description": "编程语言"
+                                    "description": "编程语言。支持别名：JavaScript/TypeScript/js/ts → node, C/c → cpp。系统会自动处理常见的误识别情况。"
                                 },
                                 "version": {
                                     "type": "string",
@@ -132,7 +132,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                                 "language": {
                                     "type": "string",
                                     "enum": ["rust", "python", "java", "node", "go", "cpp"],
-                                    "description": "编程语言"
+                                    "description": "编程语言。支持别名：JavaScript/TypeScript/js/ts → node, C/c → cpp。系统会自动处理常见的误识别情况。"
                                 },
                                 "version": {
                                     "type": "string",

@@ -88,8 +88,10 @@ class BatchProcessor:
                     result = future.result(timeout=self.request_timeout)
                     results.append(result)
                 except Exception as e:
+                    # 安全地获取language值
+                    language_value = task.language.value if hasattr(task.language, 'value') else str(task.language)
                     error_result = TaskResult(
-                        language=task.language.value,
+                        language=language_value,
                         library=task.library,
                         version=task.version,
                         status="error",
@@ -107,8 +109,10 @@ class BatchProcessor:
 
         try:
             # 1. 检查缓存
+            # 安全地获取language值
+            language_value = task.language.value if hasattr(task.language, 'value') else str(task.language)
             cache_key = self.cache_manager.generate_key(
-                task.language.value, task.library, task.operation, task.version
+                language_value, task.library, task.operation, task.version
             )
             cached_result = self.cache_manager.get(cache_key)
             if cached_result:
@@ -118,7 +122,7 @@ class BatchProcessor:
                     cached_version = cached_result.get("version", task.version)
 
                 return TaskResult(
-                    language=task.language.value,
+                    language=language_value,
                     library=task.library,
                     version=cached_version,
                     status="success",
@@ -134,7 +138,7 @@ class BatchProcessor:
         worker = self.worker_factory.create_worker(task.language, self.request_timeout)
         if not worker:
             return TaskResult(
-                language=task.language.value,
+                language=language_value,
                 library=task.library,
                 version=task.version,
                 status="error",
@@ -168,7 +172,7 @@ class BatchProcessor:
 
                 # 构造符合PRD规范的TaskResult，包含exists字段
                 return TaskResult(
-                    language=task.language.value,
+                    language=language_value,
                     library=task.library,
                     version=task.version,
                     status="success",
@@ -179,7 +183,7 @@ class BatchProcessor:
                 )
 
             return TaskResult(
-                language=task.language.value,
+                language=language_value,
                 library=task.library,
                 version=result_version,
                 status="success",
@@ -190,7 +194,7 @@ class BatchProcessor:
 
         except Exception as e:
             return TaskResult(
-                language=task.language.value,
+                language=language_value,
                 library=task.library,
                 version=task.version,
                 status="error",

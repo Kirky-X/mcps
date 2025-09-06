@@ -108,8 +108,23 @@ class Settings(BaseSettings):
         description="最大缓存条目数"
     )
 
+    # 额外的环境变量支持（用于兼容性）
+    goproxy: Optional[str] = Field(
+        default=None,
+        description="Go代理设置"
+    )
+    npm_config_registry: Optional[str] = Field(
+        default=None,
+        description="NPM注册表配置"
+    )
+    node_mirror_primary_url: Optional[str] = Field(
+        default=None,
+        description="Node.js主镜像URL"
+    )
+
     model_config = ConfigDict(
         env_prefix="LIBRARYMASTER_",
         case_sensitive=False,
-        env_file=".env"
+        env_file=".env",
+        extra="ignore"  # 忽略额外字段而不是报错
     )

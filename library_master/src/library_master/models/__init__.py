@@ -3,32 +3,154 @@
 from enum import Enum
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class Language(str, Enum):
-    """支持的编程语言"""
+    """支持的编程语言
+    
+    增强版Language枚举，支持语言别名和智能识别
+    """
     RUST = "rust"
     PYTHON = "python"
     JAVA = "java"
     NODE = "node"
     GO = "go"
     CPP = "cpp"
+    
+    @classmethod
+    def from_string(cls, language_input: str) -> 'Language':
+        """从字符串创建Language实例，支持别名和容错
+        
+        Args:
+            language_input: 语言字符串（支持别名）
+            
+        Returns:
+            Language枚举实例
+            
+        Raises:
+            ValueError: 如果无法识别语言
+        """
+        # 延迟导入避免循环依赖
+        from ..core.language_mapper import normalize_language
+        
+        try:
+            normalized = normalize_language(language_input)
+            return cls(normalized)
+        except ValueError as e:
+            # 提供更友好的错误信息
+            from ..core.language_mapper import suggest_language_corrections
+            suggestions = suggest_language_corrections(language_input)
+            
+            error_msg = f"Unsupported language: '{language_input}'"
+            if suggestions:
+                error_msg += f". Did you mean: {', '.join(suggestions)}?"
+            else:
+                error_msg += f". Supported languages: {', '.join([lang.value for lang in cls])}"
+            
+            raise ValueError(error_msg) from e
+    
+    @classmethod
+    def is_valid(cls, language_input: str) -> bool:
+        """检查语言输入是否有效
+        
+        Args:
+            language_input: 语言字符串
+            
+        Returns:
+            是否为有效语言
+        """
+        try:
+            cls.from_string(language_input)
+            return True
+        except ValueError:
+            return False
+    
+    @classmethod
+    def get_aliases(cls, language: 'Language') -> List[str]:
+        """获取指定语言的所有别名
+        
+        Args:
+            language: Language枚举实例
+            
+        Returns:
+            该语言的所有别名列表
+        """
+        from ..core.language_mapper import get_language_mapper
+        return get_language_mapper().get_language_aliases(language.value)
+    
+    def get_display_name(self) -> str:
+        """获取语言的显示名称"""
+        display_names = {
+            "rust": "Rust",
+            "python": "Python", 
+            "java": "Java",
+            "node": "Node.js",
+            "go": "Go",
+            "cpp": "C++"
+        }
+        return display_names.get(self.value, self.value.title())
 
 
 class LibraryQuery(BaseModel):
-    """库查询请求"""
+    """库查询请求
+    
+    支持智能语言识别和转换
+    """
     name: str = Field(..., description="库名称")
     language: Language = Field(..., description="编程语言")
     version: Optional[str] = Field(None, description="版本号")
+    
+    @validator('language', pre=True)
+    def validate_language(cls, v):
+        """验证并转换语言输入
+        
+        支持字符串输入并自动转换为Language枚举
+        """
+        if isinstance(v, str):
+            return Language.from_string(v)
+        elif isinstance(v, Language):
+            return v
+        else:
+            raise ValueError(f"Language must be a string or Language enum, got {type(v)}")
+    
+    class Config:
+        """Pydantic配置"""
+        # 允许使用枚举值进行序列化
+        use_enum_values = True
+        # 提供示例
+        schema_extra = {
+            "example": {
+                "name": "express",
+                "language": "node",  # 支持别名
+                "version": "4.18.0"
+            }
+        }
 
 
 class Task(BaseModel):
-    """任务模型"""
+    """任务模型
+    
+    支持智能语言识别和转换
+    """
     language: Language = Field(..., description="编程语言")
     library: str = Field(..., description="库名称")
     version: Optional[str] = Field(None, description="版本号")
     operation: str = Field(..., description="操作类型")
+    
+    @validator('language', pre=True)
+    def validate_language(cls, v):
+        """验证并转换语言输入"""
+        if isinstance(v, str):
+            return Language.from_string(v)
+        elif isinstance(v, Language):
+            return v
+        else:
+            raise ValueError(f"Language must be a string or Language enum, got {type(v)}")
+    
+    class Config:
+        """Pydantic配置"""
+        use_enum_values = True
 
 
 class TaskResult(BaseModel):

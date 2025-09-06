@@ -8,8 +8,9 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from library_master.tools.context7_tools import Context7Tools
+from library_master.tools.context7_tools import Context7Tools, create_context7_tools
 from library_master.clients.context7_client import Context7Client
+from library_master.core.config import Settings
 from library_master.exceptions import LibraryNotFoundError
 
 
@@ -571,6 +572,9 @@ class TestContext7ErrorHandling:
                 # 异常也是可接受的，只要不崩溃
 
         print(f"验证通过: 优雅处理特殊字符查询")
+
+
+
 
 
 if __name__ == "__main__":

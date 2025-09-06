@@ -110,7 +110,7 @@ class LibraryMasterServer:
         """
         try:
             library_queries = [
-                LibraryQuery(name=lib["name"], language=Language(lib["language"]), version=None)
+                LibraryQuery(name=lib["name"], language=Language.from_string(lib["language"]), version=None)
                 for lib in libraries
             ]
 
@@ -137,7 +137,7 @@ class LibraryMasterServer:
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],
-                    language=Language(lib["language"]),
+                    language=Language.from_string(lib["language"]),
                     version=lib.get("version")
                 )
                 for lib in libraries
@@ -166,7 +166,7 @@ class LibraryMasterServer:
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],
-                    language=Language(lib["language"]),
+                    language=Language.from_string(lib["language"]),
                     version=lib["version"]
                 )
                 for lib in libraries
@@ -195,7 +195,7 @@ class LibraryMasterServer:
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],
-                    language=Language(lib["language"]),
+                    language=Language.from_string(lib["language"]),
                     version=lib.get("version")
                 )
                 for lib in libraries
