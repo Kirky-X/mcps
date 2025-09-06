@@ -110,7 +110,8 @@ async def list_tools() -> List[Tool]:
 
         Tool(
             name="search_holiday",
-            description="Search for holidays by name. Returns holiday date and days until. If query is empty, returns next upcoming holiday.",
+            description=("Search for holidays by name. Returns holiday date and days until. "
+                         "If query is empty, returns next upcoming holiday."),
             inputSchema={
                 "type": "object",
                 "properties": {

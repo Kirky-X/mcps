@@ -135,8 +135,14 @@ class ChineseCalendarManager:
 
                 # Almanac information (Yi/Ji - suitable/unsuitable activities)
                 'almanac': {
-                    'suitable_activities': good_things if isinstance(good_things, list) else [good_things] if good_things else [],
-                    'unsuitable_activities': bad_things if isinstance(bad_things, list) else [bad_things] if bad_things else [],
+                    'suitable_activities': (
+                        good_things if isinstance(good_things, list)
+                        else [good_things] if good_things else []
+                    ),
+                    'unsuitable_activities': (
+                        bad_things if isinstance(bad_things, list)
+                        else [bad_things] if bad_things else []
+                    ),
                     'level': getattr(lunar, 'todayLevelName', ''),
                     'god_type': getattr(lunar, 'godType', ''),
                     'angel_demon': getattr(lunar, 'angelDemon', '')
@@ -146,16 +152,34 @@ class ChineseCalendarManager:
                 'traditional': {
                     'twenty_eight_stars': getattr(lunar, 'today28Star', ''),
                     'twelve_day_officer': getattr(lunar, 'today12DayOfficer', ''),
-                    'five_elements': getattr(lunar, 'get_today5Elements', lambda: '')() if hasattr(lunar, 'get_today5Elements') else '',
-                    'nayin': getattr(lunar, 'get_nayin', lambda: '')() if hasattr(lunar, 'get_nayin') else '',
-                    'fetal_god': getattr(lunar, 'get_fetalGod', lambda: '')() if hasattr(lunar, 'get_fetalGod') else ''
+                    'five_elements': (
+                        getattr(lunar, 'get_today5Elements', lambda: '')()
+                        if hasattr(lunar, 'get_today5Elements') else ''
+                    ),
+                    'nayin': (
+                        getattr(lunar, 'get_nayin', lambda: '')()
+                        if hasattr(lunar, 'get_nayin') else ''
+                    ),
+                    'fetal_god': (
+                        getattr(lunar, 'get_fetalGod', lambda: '')()
+                        if hasattr(lunar, 'get_fetalGod') else ''
+                    )
                 },
 
                 # Holiday information
                 'holidays': {
-                    'legal_holidays': getattr(lunar, 'get_legalHolidays', lambda: [])() if hasattr(lunar, 'get_legalHolidays') else [],
-                    'other_holidays': getattr(lunar, 'get_otherHolidays', lambda: [])() if hasattr(lunar, 'get_otherHolidays') else [],
-                    'lunar_holidays': getattr(lunar, 'get_otherLunarHolidays', lambda: [])() if hasattr(lunar, 'get_otherLunarHolidays') else []
+                    'legal_holidays': (
+                        getattr(lunar, 'get_legalHolidays', lambda: [])()
+                        if hasattr(lunar, 'get_legalHolidays') else []
+                    ),
+                    'other_holidays': (
+                        getattr(lunar, 'get_otherHolidays', lambda: [])()
+                        if hasattr(lunar, 'get_otherHolidays') else []
+                    ),
+                    'lunar_holidays': (
+                        getattr(lunar, 'get_otherLunarHolidays', lambda: [])()
+                        if hasattr(lunar, 'get_otherLunarHolidays') else []
+                    )
                 }
             }
 
