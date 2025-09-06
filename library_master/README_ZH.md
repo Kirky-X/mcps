@@ -42,7 +42,7 @@ Context7 API 提供智能库搜索和文档查询功能。
 
 ```bash
 # 克隆仓库
-git clone <repository-url>
+git clone https://github.com/Kirky-X/mcps.git
 cd LibraryMaster
 
 # 安装 uv（如果尚未安装）

@@ -39,7 +39,7 @@ queries.
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Kirky-X/mcps.git
 cd LibraryMaster
 
 # Install uv (if not already installed)
