@@ -1,8 +1,8 @@
-# Time Master - 中国历法接口 API 参考文档
+# TimeMaster v0.1.3 - 中国历法 API 参考文档
 
 ## 概述
 
-Time Master 提供了完整的中国历法功能，包括公历与农历转换、天干地支计算、二十四节气查询、生肖查询和黄历信息等。本文档详细描述了所有可用的API接口。
+TimeMaster 提供了统一的中国历法接口，通过单一方法获取完整的中国历法信息，包括公历与农历转换、天干地支计算、二十四节气查询、生肖查询和黄历信息等。
 
 ## 版本信息
 
@@ -24,9 +24,7 @@ result = tm.get_chinese_calendar_info('2024-02-10')
 print(result)
 ```
 
-## 核心接口
-
-### 1. 统一接口
+## 统一接口
 
 #### `get_chinese_calendar_info(date_input)`
 
@@ -108,161 +106,7 @@ print(f"生肖: {result['zodiac']['chinese_zodiac']}")
 print(f"干支: {result['ganzhi']['year']}年")
 ```
 
-### 2. 简化接口
 
-#### `gregorian_to_lunar(date_input)`
-
-公历转农历日期。
-
-**参数:**
-- `date_input` (str|datetime|date): 公历日期
-
-**返回值:**
-```python
-{
-    'lunar_year': int,
-    'lunar_month': int,
-    'lunar_day': int,
-    'lunar_year_cn': str,
-    'lunar_month_cn': str,
-    'lunar_day_cn': str,
-    'is_leap_month': bool,
-    'lunar_date_str': str
-}
-```
-
-**示例:**
-```python
-result = tm.gregorian_to_lunar('2024-02-10')
-print(f"农历: {result['lunar_date_str']}")
-```
-
-#### `lunar_to_gregorian(lunar_year, lunar_month, lunar_day, is_leap_month=False)`
-
-农历转公历日期。
-
-**参数:**
-- `lunar_year` (int): 农历年
-- `lunar_month` (int): 农历月
-- `lunar_day` (int): 农历日
-- `is_leap_month` (bool): 是否闰月，默认False
-
-**返回值:**
-```python
-{
-    'gregorian_year': int,
-    'gregorian_month': int,
-    'gregorian_day': int,
-    'gregorian_date_str': str,
-    'weekday': str,
-    'weekday_cn': str
-}
-```
-
-**示例:**
-```python
-# 2024年正月初一转公历
-result = tm.lunar_to_gregorian(2024, 1, 1)
-print(f"公历: {result['gregorian_date_str']}")
-```
-
-#### `get_ganzhi(date_input)`
-
-获取天干地支信息。
-
-**参数:**
-- `date_input` (str|datetime|date): 输入日期
-
-**返回值:**
-```python
-{
-    'year_ganzhi': str,
-    'month_ganzhi': str,
-    'day_ganzhi': str,
-    'hour_ganzhi': str,
-    'full_bazi': tuple
-}
-```
-
-**示例:**
-```python
-result = tm.get_ganzhi('2024-02-10')
-print(f"年干支: {result['year_ganzhi']}")
-print(f"完整八字: {result['full_bazi']}")
-```
-
-#### `get_solar_terms(year)`
-
-获取指定年份的二十四节气。
-
-**参数:**
-- `year` (int): 年份
-
-**返回值:**
-```python
-{
-    'year': int,
-    'solar_terms': {
-        '立春': (month, day),
-        '雨水': (month, day),
-        # ... 其他节气
-    }
-}
-```
-
-**示例:**
-```python
-result = tm.get_solar_terms(2024)
-print(f"2024年立春: {result['solar_terms']['立春']}")
-```
-
-#### `get_zodiac(year)`
-
-获取指定年份的生肖信息。
-
-**参数:**
-- `year` (int): 年份
-
-**返回值:**
-```python
-{
-    'year': int,
-    'zodiac': str,
-    'zodiac_clash': str,
-    'year_ganzhi': str
-}
-```
-
-**示例:**
-```python
-result = tm.get_zodiac(2024)
-print(f"2024年生肖: {result['zodiac']}")
-```
-
-#### `get_almanac(date_input)`
-
-获取黄历信息。
-
-**参数:**
-- `date_input` (str|datetime|date): 输入日期
-
-**返回值:**
-```python
-{
-    'suitable_activities': list,
-    'unsuitable_activities': list,
-    'level': str,
-    'god_type': str,
-    'angel_demon': tuple
-}
-```
-
-**示例:**
-```python
-result = tm.get_almanac('2024-02-10')
-print(f"宜: {', '.join(result['suitable_activities'])}")
-print(f"忌: {', '.join(result['unsuitable_activities'])}")
-```
 
 ## 错误处理
 
