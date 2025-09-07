@@ -36,32 +36,28 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "timezone": {
                         "type": "string",
-                        "description": "Target timezone (default: local timezone)"
+                        "description": "Target timezone (default: local timezone)",
                     },
                     "time_str": {
                         "type": "string",
-                        "description": "Time string to convert (if not provided, gets current time)"
+                        "description": "Time string to convert (if not provided, gets current time)",
                     },
                     "from_tz": {
                         "type": "string",
-                        "description": "Source timezone for conversion (required if time_str is provided)"
+                        "description": "Source timezone for conversion (required if time_str is provided)",
                     },
                     "format": {
                         "type": "string",
                         "description": "Output format: 'iso' or 'friendly_cn' (default: 'iso')",
-                        "default": "iso"
-                    }
-                }
-            }
+                        "default": "iso",
+                    },
+                },
+            },
         ),
-
         Tool(
             name="get_local_timezone",
             description="Get the local system timezone",
-            inputSchema={
-                "type": "object",
-                "properties": {}
-            }
+            inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
             name="search_timezones",
@@ -72,77 +68,83 @@ async def list_tools() -> List[Tool]:
                     "query": {
                         "type": "string",
                         "description": "Search query for timezone names (empty string returns all timezones)",
-                        "default": ""
+                        "default": "",
                     },
                     "limit": {
                         "type": "integer",
                         "description": "Maximum number of results to return (default: 20)",
-                        "default": 20
-                    }
-                }
-            }
+                        "default": 20,
+                    },
+                },
+            },
         ),
-
         Tool(
             name="calculate_time_difference",
-            description="Calculate the time difference between two times in different timezones",
+            description=(
+                "Calculate the time difference between two times "
+                "in different timezones"
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "time1": {
                         "type": "string",
-                        "description": "First time string"
+                        "description": "First time string",
                     },
                     "tz1": {
                         "type": "string",
-                        "description": "Timezone for first time"
+                        "description": "Timezone for first time",
                     },
                     "time2": {
                         "type": "string",
-                        "description": "Second time string"
+                        "description": "Second time string",
                     },
                     "tz2": {
                         "type": "string",
-                        "description": "Timezone for second time"
-                    }
+                        "description": "Timezone for second time",
+                    },
                 },
-                "required": ["time1", "tz1", "time2", "tz2"]
-            }
+                "required": ["time1", "tz1", "time2", "tz2"],
+            },
         ),
-
         Tool(
             name="search_holiday",
-            description=("Search for holidays by name. Returns holiday date and days until. "
-                         "If query is empty, returns next upcoming holiday."),
+            description=(
+                "Search for holidays by name. Returns holiday date and days until. "
+                "If query is empty, returns next upcoming holiday."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Search query for holiday names (empty string returns next holiday)",
-                        "default": ""
+                        "description": (
+                            "Search query for holiday names "
+                            "(empty string returns next holiday)"
+                        ),
+                        "default": "",
                     },
                     "country": {
                         "type": "string",
                         "description": "ISO country code (e.g., 'US', 'GB', 'FR')",
-                        "default": ""
+                        "default": "",
                     },
                     "timezone": {
                         "type": "string",
                         "description": "Timezone to infer country from (e.g., 'America/New_York')",
-                        "default": ""
+                        "default": "",
                     },
                     "year": {
                         "type": "integer",
-                        "description": "Year (default: current year)"
+                        "description": "Year (default: current year)",
                     },
                     "limit": {
                         "type": "integer",
                         "description": "Maximum number of results to return (default: 10)",
-                        "default": 10
-                    }
-                }
-            }
+                        "default": 10,
+                    },
+                },
+            },
         ),
         Tool(
             name="list_holidays",
@@ -153,21 +155,20 @@ async def list_tools() -> List[Tool]:
                     "country": {
                         "type": "string",
                         "description": "ISO country code (e.g., 'US', 'GB', 'FR')",
-                        "default": ""
+                        "default": "",
                     },
                     "timezone": {
                         "type": "string",
                         "description": "Timezone to infer country from (e.g., 'America/New_York')",
-                        "default": ""
+                        "default": "",
                     },
                     "year": {
                         "type": "integer",
-                        "description": "Year (default: current year)"
-                    }
-                }
-            }
+                        "description": "Year (default: current year)",
+                    },
+                },
+            },
         ),
-
         # Chinese Calendar Tools
         Tool(
             name="gregorian_to_lunar",
@@ -177,12 +178,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date": {
                         "type": "string",
-                        "description": "Gregorian date in YYYY-MM-DD format (default: today)"
+                        "description": "Gregorian date in YYYY-MM-DD format (default: today)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="lunar_to_gregorian",
             description="Convert Chinese lunar date to Gregorian date",
@@ -191,26 +191,25 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "lunar_year": {
                         "type": "integer",
-                        "description": "Lunar year"
+                        "description": "Lunar year",
                     },
                     "lunar_month": {
                         "type": "integer",
-                        "description": "Lunar month (1-12)"
+                        "description": "Lunar month (1-12)",
                     },
                     "lunar_day": {
                         "type": "integer",
-                        "description": "Lunar day (1-30)"
+                        "description": "Lunar day (1-30)",
                     },
                     "is_leap_month": {
                         "type": "boolean",
                         "description": "Whether it's a leap month (default: false)",
-                        "default": False
-                    }
+                        "default": False,
+                    },
                 },
-                "required": ["lunar_year", "lunar_month", "lunar_day"]
-            }
+                "required": ["lunar_year", "lunar_month", "lunar_day"],
+            },
         ),
-
         Tool(
             name="get_ganzhi",
             description="Get Heavenly Stems and Earthly Branches (Ganzhi/Four Pillars) for a date",
@@ -219,12 +218,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date": {
                         "type": "string",
-                        "description": "Date in YYYY-MM-DD format (default: today)"
+                        "description": "Date in YYYY-MM-DD format (default: today)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_solar_terms",
             description="Get all 24 solar terms for a given year",
@@ -233,12 +231,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "year": {
                         "type": "integer",
-                        "description": "Year to get solar terms for (default: current year)"
+                        "description": "Year to get solar terms for (default: current year)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_next_solar_term",
             description="Get the next solar term from a given date",
@@ -247,12 +244,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date": {
                         "type": "string",
-                        "description": "Starting date in YYYY-MM-DD format (default: today)"
+                        "description": "Starting date in YYYY-MM-DD format (default: today)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_zodiac",
             description="Get Chinese zodiac animal for a given date or year",
@@ -261,12 +257,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date_or_year": {
                         "type": "string",
-                        "description": "Date in YYYY-MM-DD format or year as string (default: current year)"
+                        "description": "Date in YYYY-MM-DD format or year as string (default: current year)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_chinese_holidays",
             description="Get Chinese traditional holidays for a given year",
@@ -275,12 +270,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "year": {
                         "type": "integer",
-                        "description": "Year to get Chinese holidays for (default: current year)"
+                        "description": "Year to get Chinese holidays for (default: current year)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_almanac_info",
             description="Get Chinese almanac information (suitable and unsuitable activities) for a date",
@@ -289,12 +283,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date": {
                         "type": "string",
-                        "description": "Date in YYYY-MM-DD format (default: today)"
+                        "description": "Date in YYYY-MM-DD format (default: today)",
                     }
-                }
-            }
+                },
+            },
         ),
-
         Tool(
             name="get_comprehensive_chinese_info",
             description="Get comprehensive Chinese calendar information for a given date",
@@ -303,11 +296,11 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "date": {
                         "type": "string",
-                        "description": "Date in YYYY-MM-DD format (default: today)"
+                        "description": "Date in YYYY-MM-DD format (default: today)",
                     }
-                }
-            }
-        )
+                },
+            },
+        ),
     ]
 
 
@@ -325,28 +318,35 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 timezone=timezone,
                 time_str=time_str,
                 from_tz=from_tz,
-                format=format_type
+                format=format_type,
             )
 
             if time_str:
-                actual_timezone = timezone if timezone else timemaster.get_local_timezone()
+                actual_timezone = (
+                    timezone if timezone else timemaster.get_local_timezone()
+                )
                 return [
                     TextContent(
                         type="text",
-                        text=f"Converted time: {result} ({actual_timezone})")]
+                        text=f"Converted time: {result} ({actual_timezone})",
+                    )
+                ]
             else:
-                actual_timezone = timezone if timezone else timemaster.get_local_timezone()
+                actual_timezone = (
+                    timezone if timezone else timemaster.get_local_timezone()
+                )
                 return [
                     TextContent(
                         type="text",
-                        text=f"Current time in {actual_timezone}: {result}")]
+                        text=f"Current time in {actual_timezone}: {result}",
+                    )
+                ]
 
         elif name == "get_local_timezone":
             local_tz = timemaster.get_local_timezone()
             return [
-                TextContent(
-                    type="text",
-                    text=f"Local timezone: {local_tz}")]
+                TextContent(type="text", text=f"Local timezone: {local_tz}")
+            ]
 
         elif name == "search_timezones":
             query = arguments.get("query", "")
@@ -358,21 +358,30 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                     return [
                         TextContent(
                             type="text",
-                            text=f"Matching timezones for '{query}':\n{result}")]
+                            text=f"Matching timezones for '{query}':\n{result}",
+                        )
+                    ]
                 else:
                     total_count = len(list(pytz.all_timezones))
-                    suffix = f"\n... and {
-                        total_count - len(matches)} more" if len(matches) < total_count else ""
+                    suffix = (
+                        f"\n... and {total_count - len(matches)} more"
+                        if len(matches) < total_count
+                        else ""
+                    )
                     return [
                         TextContent(
                             type="text",
                             text=f"All timezones (showing {
-                                len(matches)}):\n{result}{suffix}")]
+                                len(matches)}):\n{result}{suffix}",
+                        )
+                    ]
             else:
                 return [
                     TextContent(
                         type="text",
-                        text=f"No timezones found matching '{query}'")]
+                        text=f"No timezones found matching '{query}'",
+                    )
+                ]
 
         elif name == "calculate_time_difference":
             tz1 = arguments["tz1"]
@@ -381,7 +390,9 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             return [
                 TextContent(
                     type="text",
-                    text=f"Time difference between {tz1} and {tz2}: {diff}")]
+                    text=f"Time difference between {tz1} and {tz2}: {diff}",
+                )
+            ]
 
         elif name == "search_holiday":
             query = arguments.get("query", "")
@@ -395,14 +406,11 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                 country=country if country else None,
                 timezone=timezone if timezone else None,
                 year=year,
-                limit=limit
+                limit=limit,
             )
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "list_holidays":
             country = arguments.get("country", "")
@@ -412,25 +420,19 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             result = timemaster.list_holidays(
                 country=country if country else None,
                 timezone=timezone if timezone else None,
-                year=year
+                year=year,
             )
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         # Chinese Calendar Tools
         elif name == "gregorian_to_lunar":
             date_str = arguments["date"]
             result = timemaster.gregorian_to_lunar(date_str)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "lunar_to_gregorian":
             year = arguments["year"]
@@ -439,82 +441,58 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             leap = arguments.get("leap", False)
             result = timemaster.lunar_to_gregorian(year, month, day, leap)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_ganzhi":
             date_str = arguments["date"]
             result = timemaster.get_ganzhi(date_str)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_solar_terms":
             year = arguments["year"]
             result = timemaster.get_solar_terms(year)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_zodiac":
             year = arguments["year"]
             result = timemaster.get_zodiac(year)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_chinese_holidays":
             year = arguments["year"]
             result = timemaster.get_chinese_holidays(year)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_almanac_info":
             date_str = arguments["date"]
             result = timemaster.get_almanac_info(date_str)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "is_chinese_holiday":
             date_str = arguments["date"]
             result = timemaster.is_chinese_holiday(date_str)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         elif name == "get_lunar_month_info":
             year = arguments["year"]
             month = arguments["month"]
             result = timemaster.get_lunar_month_info(year, month)
             return [
-                TextContent(
-                    type="text",
-                    text=json.dumps(
-                        result,
-                        indent=2))]
+                TextContent(type="text", text=json.dumps(result, indent=2))
+            ]
 
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
@@ -524,7 +502,9 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
             TextContent(
                 type="text",
                 text=f"Error executing tool '{name}': {
-                    str(e)}")]
+                    str(e)}",
+            )
+        ]
 
 
 def setup_working_directory():
@@ -551,9 +531,7 @@ async def main():
 
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options()
+            read_stream, write_stream, server.create_initialization_options()
         )
 
 
