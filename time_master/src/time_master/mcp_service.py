@@ -500,8 +500,7 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
         return [
             TextContent(
                 type="text",
-                text=f"Error executing tool '{name}': {
-                    str(e)}",
+                text=f"Error executing tool '{name}': {str(e)}",
             )
         ]
 
