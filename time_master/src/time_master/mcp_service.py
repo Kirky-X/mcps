@@ -371,8 +371,7 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                     return [
                         TextContent(
                             type="text",
-                            text=f"All timezones (showing {
-                                len(matches)}):\n{result}{suffix}",
+                            text=f"All timezones (showing {len(matches)}):\n{result}{suffix}",
                         )
                     ]
             else:
