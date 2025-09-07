@@ -11,7 +11,7 @@ import holidays
 import pytz
 import requests
 from requests.exceptions import RequestException, Timeout
-
+from thefuzz import process
 from tzlocal import get_localzone
 
 from .config import TimeMasterConfig

@@ -361,7 +361,8 @@ async def call_tool(name: str, arguments: dict) -> List[TextContent]:
                             text=f"Matching timezones for '{query}':\n{result}")]
                 else:
                     total_count = len(list(pytz.all_timezones))
-                    suffix = f"\n... and {total_count - len(matches)} more" if len(matches) < total_count else ""
+                    suffix = f"\n... and {
+                        total_count - len(matches)} more" if len(matches) < total_count else ""
                     return [
                         TextContent(
                             type="text",

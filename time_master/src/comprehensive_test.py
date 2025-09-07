@@ -114,7 +114,7 @@ class ComprehensiveTestSuite:
         total_time = end_time - start_time
         avg_time = (total_time / len(test_dates)) * 1000  # Convert to milliseconds
 
-        print("批量转换测试:")
+        print(f"批量转换测试:")
         print(f"  总请求数: {len(test_dates)}")
         print(f"  成功请求数: {successful_calls}")
         print(f"  总耗时: {total_time:.2f}秒")
