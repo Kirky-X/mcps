@@ -1,0 +1,33 @@
+name: Package Git Service
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Tarball
+        run: |
+          # Create a directory for the artifact
+          mkdir -p dist
+          
+          # Package the git service directory
+          # We exclude .venv, .pytest_cache, __pycache__ etc. just in case they exist in the repo (though they shouldn't)
+          tar --exclude='*.pyc' \
+              --exclude='__pycache__' \
+              --exclude='.venv' \
+              --exclude='.pytest_cache' \
+              --exclude='uv.lock' \
+              -czf dist/mcp-git.tar.gz -C services git
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-git-package
+          path: dist/mcp-git.tar.gz

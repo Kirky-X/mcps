@@ -1,0 +1,9 @@
+.venv
+.pytest_cache
+services/git/.venv
+services/git/.pytest_cache
+services/git/docs
+services/git/uv.lock
+services/git/src/mcp_git/__pycache__
+__pycache__
+*.pyc
