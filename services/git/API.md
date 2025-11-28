@@ -38,7 +38,7 @@ git_diff("/repo", mode="all")
 ## 远程仓库操作
 - `git_remote(repo_path: str, action: Literal["list","add","remove"], name: Optional[str], url: Optional[str])`
 - `git_pull(repo_path: str, remote: str = "origin", branch: Optional[str]) -> Dict`
-- `git_push(repo_path: str, remote: str = "origin", branch: Optional[str], force: bool = False) -> str`
+- `git_push(repo_path: str, remote: str = "origin", branch: Optional[str], force: bool = False) -> Any`
 
 ## 高级操作
 - `git_merge(repo_path: str, source_branch: str, strategy: Optional[str]) -> Dict`
@@ -72,4 +72,3 @@ git_diff("/repo", mode="all")
   }
 }
 ```
-

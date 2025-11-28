@@ -414,7 +414,7 @@ def git_push(
     remote: str = "origin",
     branch: str = None,
     force: bool = False
-) -> str:
+) -> Any:
     """
     Update remote refs along with associated objects.
     
@@ -425,7 +425,7 @@ def git_push(
         force: Force push (default: False)
         
     Returns:
-        Status message
+        Status message or error dictionary
     """
     try:
         return _git_push(repo_path, remote, branch, force)
