@@ -46,3 +46,5 @@ __all__ = [
     "git_merge",
     "git_cherry_pick"
 ]
+
+__version__ = "0.1.0"

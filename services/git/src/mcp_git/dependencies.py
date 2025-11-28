@@ -199,28 +199,31 @@ class DependencyManager:
         self.source_installer = SourceInstaller()
 
     def ensure_libgit2(self):
-        # Priority 1: Try uv pip install pygit2
-        if not self._check_import():
-            logger.info("Attempting UV installation of pygit2...")
-            if self._install_via_uv():
-                if self._check_import():
-                    return
-        else:
+        if self._check_import():
             return
 
-        # Priority 2: System Package Manager
         logger.info("Attempting system installation...")
         if self.system_installer.install():
             if self._check_import():
                 return
+            logger.info("System install did not resolve, attempting UV installation...")
+            if self._install_via_uv():
+                if self._check_import():
+                    return
+            logger.info("UV install did not resolve, attempting source installation...")
+            if self.source_installer.install():
+                if self._check_import():
+                    return
+        else:
+            logger.info("System install unavailable/failed, attempting source installation...")
+            if self.source_installer.install():
+                if self._check_import():
+                    return
+            logger.info("Source install did not resolve, attempting UV installation...")
+            if self._install_via_uv():
+                if self._check_import():
+                    return
 
-        # Priority 3: Source Compilation
-        logger.info("Attempting source installation...")
-        if self.source_installer.install():
-            if self._check_import():
-                return
-
-        # Failure
         raise GitError(
             code=GitErrorCode.LIBGIT2_MISSING,
             message="Failed to install libgit2 dependency.",
