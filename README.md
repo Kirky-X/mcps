@@ -1,27 +1,88 @@
-# MCP 仓库总览
+# MCP Services Monorepo
 
-本仓库为 MCP（Model Context Protocol）多服务模块的单体仓库，当前已包含 Git 服务模块 `mcp-git`（位于 `services/git`）。
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![MCP Git Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml)
 
-主要目标：
-- 提供可复用、可观测、生产级的 MCP 服务器实现
-- 通过统一的协议向 AI 代理暴露工具能力
-- 按模块划分服务，统一版本与发布流程
+A monorepo containing multiple Model Context Protocol (MCP) services for various functionalities.
 
-目录结构：
-- `services/git`：Git 操作 MCP 服务模块（基于 `pygit2`/`libgit2`）
-- `.github/workflows`：CI/CD 工作流（包含 `mcp-git` 发布流程）
+## Services
 
-快速开始：
-- 安装：`uv pip install mcp-git`
-- 运行：`uv run mcp-git --debug`
+This monorepo contains the following MCP services:
 
-发布约定：
-- 使用带前缀的标签进行发布：`mcp-git-vX.Y.Z`
-- GitHub Action 会在推送上述标签后自动构建并创建 Release，附带 `wheel` 与 `sdist` 构件
+### 📚 MCP Git Module
 
-版本策略：
-- 统一遵循语义化版本
-- 当前 `mcp-git` 版本：`0.1.0`
+[![MCP Git](https://img.shields.io/badge/MCP-Git-blue)](services/git/README.md)
 
-更多信息：
-- 模块文档参见 `services/git/README.md`
+A robust Model Context Protocol (MCP) server implementation for Git operations, built on top of `pygit2` (libgit2 bindings). This module provides AI agents with comprehensive capabilities to interact with Git repositories safely and efficiently.
+
+**Key Features:**
+
+- Standardized Interface: Provides unified Git operation capabilities via the MCP protocol.
+- Zero Dependency Hassle: Intelligent `libgit2` installation strategy adapting to multiple platforms.
+- Production-Grade Quality: Comprehensive error handling, logging, and observability.
+
+📖 [Documentation](services/git/README.md) | 📚 [API Reference](services/git/API.md)
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.10+
+- [uv](https://docs.astral.sh/uv/) (recommended for dependency management)
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Kirky-X/mcps
+cd mcps
+```
+
+Each service can be installed independently:
+
+**MCP Git:**
+
+```bash
+cd services/git
+# Install project dependencies
+uv sync
+```
+
+## Usage
+
+### MCP Git Service
+
+```bash
+cd services/git
+uv run mcp-git --debug
+```
+
+## Development
+
+### Running Tests
+
+Each service has its own test suite:
+
+**MCP Git:**
+
+```bash
+cd services/git
+pytest tests/
+```
+
+### Code Formatting
+
+**MCP Git:**
+
+```bash
+# Format code
+black services/git/src/
+ruff check services/git/src/ --fix
+```
+
+## License
+
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
+
+Each service in this monorepo is independently licensed under the same terms as the main project.
