@@ -60,26 +60,29 @@ def git_stash_list(repo_path: str) -> List[str]:
         return 0
         
     try:
-        # Use repo.listall_stashes() which returns a list of Stash objects
-        # We need to manually iterate to format them as expected
-        if hasattr(repo, 'listall_stashes'):
-            stash_list = repo.listall_stashes()
-            for i, stash in enumerate(stash_list):
-                 # Stash object might have message property or we need to look it up
-                 # But wait, listall_stashes returns Stash objects but maybe not the message?
-                 # Actually the PRD/tests expect "stash@{n}: message"
-                 # Let's try to get the message from the commit message of the stash OID
-                 # Or use the reflog approach which is standard for git stash list
-                 pass
-                 
-        # Standard approach: iterate through reflog of refs/stash
-        # In newer pygit2, references might not have log_iter directly?
-        # Let's check how to access reflog
-        ref = repo.lookup_reference("refs/stash")
+        # Prefer reflog-based enumeration which matches git CLI behavior
+        ref = None
+        try:
+            ref = repo.lookup_reference("refs/stash")
+        except (KeyError, pygit2.GitError):
+            ref = None
+
         if ref:
-             # ref.log() returns RefLog object which is iterable
-             for i, entry in enumerate(ref.log()):
-                 stashes.append(f"stash@{{{i}}}: {entry.message.replace('WIP on ', '').replace('On ', '')}")
+            for i, entry in enumerate(ref.log()):
+                msg = entry.message or ""
+                msg = msg.replace("WIP on ", "").replace("On ", "")
+                stashes.append(f"stash@{{{i}}}: {msg}")
+        else:
+            # Fallback: use listall_stashes if available
+            if hasattr(repo, 'listall_stashes'):
+                stash_list = repo.listall_stashes()
+                for i, stash in enumerate(stash_list):
+                    try:
+                        commit = repo.get(stash.oid)
+                        msg = commit.message.strip() if commit and commit.message else ""
+                    except Exception:
+                        msg = ""
+                    stashes.append(f"stash@{{{i}}}: {msg}")
                  
     except (KeyError, AttributeError, pygit2.GitError):
         pass

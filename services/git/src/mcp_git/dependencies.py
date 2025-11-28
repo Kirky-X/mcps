@@ -199,8 +199,13 @@ class DependencyManager:
         self.source_installer = SourceInstaller()
 
     def ensure_libgit2(self):
-        # Priority 1: Check if already usable (via UV/Pip)
-        if self._check_import():
+        # Priority 1: Try uv pip install pygit2
+        if not self._check_import():
+            logger.info("Attempting UV installation of pygit2...")
+            if self._install_via_uv():
+                if self._check_import():
+                    return
+        else:
             return
 
         # Priority 2: System Package Manager
@@ -231,4 +236,16 @@ class DependencyManager:
             import pygit2
             return True
         except ImportError:
+            return False
+
+    def _install_via_uv(self) -> bool:
+        try:
+            import shutil
+            if not shutil.which("uv"):
+                return False
+            subprocess.run(["uv", "pip", "install", "pygit2"], check=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+        except Exception:
             return False

@@ -2,7 +2,6 @@ import logging
 import time
 import argparse
 from typing import Dict, Any, List
-import pygit2
 from mcp.server.fastmcp import FastMCP
 from mcp.types import Tool
 from .errors import GitError, GitErrorCode
@@ -65,7 +64,7 @@ def git_status(repo_path: str) -> List[str]:
         return _git_status(repo_path)
     except GitError as e:
         logger.error(f"Error in git_status: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_log(
@@ -90,7 +89,7 @@ def git_log(
         return _git_log(repo_path, max_count, start_timestamp, end_timestamp)
     except GitError as e:
         logger.error(f"Error in git_log: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_log_recent(
@@ -111,7 +110,7 @@ def git_log_recent(
         return _git_log_recent(repo_path, period)
     except GitError as e:
         logger.error(f"Error in git_log_recent: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_show(
@@ -132,7 +131,7 @@ def git_show(
         return _git_show(repo_path, revision)
     except GitError as e:
         logger.error(f"Error in git_show: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_diff(
@@ -161,7 +160,7 @@ def git_diff(
         return result
     except GitError as e:
         logger.error(f"Error in git_diff: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_add(repo_path: str, files: List[str]) -> List[str]:
@@ -179,7 +178,7 @@ def git_add(repo_path: str, files: List[str]) -> List[str]:
         return _git_add(repo_path, files)
     except GitError as e:
         logger.error(f"Error in git_add: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_reset(repo_path: str) -> str:
@@ -196,7 +195,7 @@ def git_reset(repo_path: str) -> str:
         return _git_reset(repo_path)
     except GitError as e:
         logger.error(f"Error in git_reset: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_commit(repo_path: str, message: str) -> str:
@@ -214,7 +213,7 @@ def git_commit(repo_path: str, message: str) -> str:
         return _git_commit(repo_path, message)
     except GitError as e:
         logger.error(f"Error in git_commit: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_restore(repo_path: str, files: List[str], staged: bool = False) -> str:
@@ -233,7 +232,7 @@ def git_restore(repo_path: str, files: List[str], staged: bool = False) -> str:
         return _git_restore(repo_path, files, staged)
     except GitError as e:
         logger.error(f"Error in git_restore: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_branch(
@@ -259,7 +258,7 @@ def git_branch(
         return _git_branch(repo_path, branch_type, contains, not_contains)
     except GitError as e:
         logger.error(f"Error in git_branch: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_create_branch(
@@ -282,7 +281,7 @@ def git_create_branch(
         return _git_create_branch(repo_path, branch_name, base_branch)
     except GitError as e:
         logger.error(f"Error in git_create_branch: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_checkout(repo_path: str, branch_name: str) -> str:
@@ -300,7 +299,7 @@ def git_checkout(repo_path: str, branch_name: str) -> str:
         return _git_checkout(repo_path, branch_name)
     except GitError as e:
         logger.error(f"Error in git_checkout: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_stash(
@@ -323,7 +322,7 @@ def git_stash(
         return _git_stash(repo_path, message, include_untracked)
     except GitError as e:
         logger.error(f"Error in git_stash: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_stash_pop(repo_path: str, stash_id: str = None) -> str:
@@ -341,7 +340,7 @@ def git_stash_pop(repo_path: str, stash_id: str = None) -> str:
         return _git_stash_pop(repo_path, stash_id)
     except GitError as e:
         logger.error(f"Error in git_stash_pop: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_stash_list(repo_path: str) -> List[str]:
@@ -358,7 +357,7 @@ def git_stash_list(repo_path: str) -> List[str]:
         return _git_stash_list(repo_path)
     except GitError as e:
         logger.error(f"Error in git_stash_list: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_remote(
@@ -384,7 +383,7 @@ def git_remote(
         return _git_remote(repo_path, action, name, url)
     except GitError as e:
         logger.error(f"Error in git_remote: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_pull(
@@ -407,7 +406,7 @@ def git_pull(
         return _git_pull(repo_path, remote, branch)
     except GitError as e:
         logger.error(f"Error in git_pull: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_push(
@@ -432,7 +431,7 @@ def git_push(
         return _git_push(repo_path, remote, branch, force)
     except GitError as e:
         logger.error(f"Error in git_push: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_merge(
@@ -459,7 +458,7 @@ def git_merge(
         return result
     except GitError as e:
         logger.error(f"Error in git_merge: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 @mcp.tool()
 def git_cherry_pick(
@@ -480,28 +479,39 @@ def git_cherry_pick(
         return _git_cherry_pick(repo_path, commit_hash)
     except GitError as e:
         logger.error(f"Error in git_cherry_pick: {e}")
-        raise RuntimeError(f"{e.code.name}: {e.message}")
+        return e.to_dict()
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="MCP Git Server")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
-    parser.add_argument("--skip-install", action="store_true", help="Skip dependency checks")
+    parser.add_argument("--skip-libgit2-install", action="store_true", help="Skip libgit2 installer chain")
+    parser.add_argument("--log-file", type=str, default=None, help="Write logs to the specified file")
     args = parser.parse_args()
 
     # Configure logging level based on arguments
     if args.debug:
         logger.setLevel(logging.DEBUG)
         logging.getLogger().setLevel(logging.DEBUG)
+    if args.log_file:
+        fh = logging.FileHandler(args.log_file)
+        fh.setLevel(logging.DEBUG if args.debug else logging.INFO)
+        fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+        fh.setFormatter(fmt)
+        logging.getLogger().addHandler(fh)
     
     # Ensure dependencies are met unless skipped
-    if not args.skip_install:
+    if not args.skip_libgit2_install:
         try:
             dep_manager.ensure_libgit2()
         except Exception as e:
             logger.warning(f"Failed to ensure libgit2 dependencies: {e}")
     
     mcp.run()
+
+# Backward-compatible alias for tests expecting health_check
+def health_check(repo_path: str) -> Dict[str, Any]:
+    return _git_health_check(repo_path)
 
 if __name__ == "__main__":
     main()

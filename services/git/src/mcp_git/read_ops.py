@@ -4,7 +4,13 @@ try:
 except ImportError:
     from typing import List, Optional, Dict, Any
     from typing_extensions import Literal
+import logging
 import pygit2
+logger = logging.getLogger("mcp_git.read_ops")
+
+# Compatibility alias for constant naming differences across pygit2 versions
+if not hasattr(pygit2, "GIT_OBJ_COMMIT") and hasattr(pygit2, "GIT_OBJECT_COMMIT"):
+    pygit2.GIT_OBJ_COMMIT = pygit2.GIT_OBJECT_COMMIT
 from .errors import GitError, GitErrorCode
 
 def _get_repo(repo_path: str) -> pygit2.Repository:
@@ -41,12 +47,48 @@ def git_health_check(repo_path: str) -> Dict[str, Any]:
             # Empty repo has no HEAD, which is technically "healthy" but empty
             pass
             
+        # Repository statistics
+        commits_count = 0
+        try:
+            if not repo.is_empty:
+                walker = repo.walk(repo.head.target, pygit2.GIT_SORT_TIME)
+                for _ in walker:
+                    commits_count += 1
+        except Exception:
+            commits_count = 0
+
+        try:
+            local_branches = list(repo.branches.local)
+            branches_count = len(local_branches)
+        except Exception:
+            branches_count = 0
+
+        try:
+            remotes_count = len(list(repo.remotes))
+        except Exception:
+            remotes_count = 0
+
+        # Versions
+        py_version = getattr(pygit2, "__version__", None)
+        libgit2_ver = getattr(pygit2, "libgit2_version", None)
+        if callable(libgit2_ver):
+            try:
+                libgit2_ver = libgit2_ver()
+            except Exception:
+                libgit2_ver = None
+
         return {
             "status": "healthy",
             "repo_path": repo_path,
             "head_reachable": head_reachable,
             "is_empty": repo.is_empty,
-            "libgit2_version": pygit2.__version__
+            "libgit2_version": libgit2_ver,
+            "pygit2_version": py_version,
+            "repo_stats": {
+                "commits": commits_count,
+                "branches": branches_count,
+                "remotes": remotes_count,
+            },
         }
     except GitError as e:
         return {
@@ -180,7 +222,7 @@ def git_show(repo_path: str, revision: str) -> Dict[str, Any]:
     
     try:
         obj = repo.revparse_single(revision)
-        if obj.type != pygit2.GIT_OBJ_COMMIT:
+        if obj.type != getattr(pygit2, "GIT_OBJ_COMMIT", getattr(pygit2, "GIT_OBJECT_COMMIT", None)):
             raise GitError(
                 code=GitErrorCode.INVALID_PARAMETER,
                 message=f"Revision {revision} is not a commit"

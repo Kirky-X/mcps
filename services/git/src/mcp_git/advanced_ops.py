@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional
 import pygit2
 from .errors import GitError, GitErrorCode
 from .read_ops import _get_repo
+import re
 
 def git_merge(
     repo_path: str,
@@ -28,24 +29,27 @@ def git_merge(
         pass
     
     try:
-        # Try to resolve source as a branch or commit
+        commit_id = None
         try:
-            # First try as a branch
             branch = repo.lookup_branch(source)
             if branch:
                 commit_id = branch.target
             else:
-                # Try as a reference
                 ref = repo.lookup_reference(source)
                 commit_id = ref.target
         except (KeyError, ValueError):
-            # Try as a commit hash
+            # Validate hex before attempting Oid to avoid unexpected behavior
+            if not re.fullmatch(r"[0-9a-fA-F]{7,40}", source or ""):
+                raise GitError(GitErrorCode.INVALID_PARAMETER, f"Invalid source reference: {source}")
             try:
                 commit_id = pygit2.Oid(hex=source)
             except ValueError:
                 raise GitError(GitErrorCode.INVALID_PARAMETER, f"Invalid source reference: {source}")
 
-        # Perform merge analysis
+        if commit_id is None:
+            raise GitError(GitErrorCode.INVALID_PARAMETER, f"Invalid source reference: {source}")
+
+        # Perform merge analysis (accept commit_id as returned by repo APIs)
         analysis, _ = repo.merge_analysis(commit_id)
         
         if analysis & pygit2.GIT_MERGE_ANALYSIS_UP_TO_DATE:
@@ -80,7 +84,8 @@ def git_merge(
     except GitError:
         raise
     except Exception as e:
-        raise GitError(GitErrorCode.OPERATION_FAILED, f"Unexpected error during merge: {str(e)}")
+        # Classify pre-merge resolution problems as invalid parameter when applicable
+        raise GitError(GitErrorCode.INVALID_PARAMETER, f"Invalid input or merge state: {str(e)}")
 
 
 def git_cherry_pick(

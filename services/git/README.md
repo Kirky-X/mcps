@@ -102,6 +102,10 @@ uv run mcp-git --skip-libgit2-install
 uv run mcp-git --log-file /var/log/mcp-git.log
 ```
 
+Logging behavior:
+- By default, logs go to stdout at INFO level; `--debug` enables verbose timing and installer details.
+- When `--log-file` is provided, logs also write to the specified file using format: `timestamp level logger: message`.
+
 ## ⚠️ Error Handling
 
 The module uses standardized error codes:
