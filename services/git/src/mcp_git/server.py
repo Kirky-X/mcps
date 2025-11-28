@@ -408,7 +408,24 @@ def git_pull(
         logger.error(f"Error in git_pull: {e}")
         return e.to_dict()
 
-@mcp.tool()
+@mcp.tool(output_schema={
+    "oneOf": [
+        {"type": "string"},
+        {
+            "type": "object",
+            "properties": {
+                "success": {"type": "boolean"},
+                "message": {"type": "string"},
+                "remote": {"type": "string"},
+                "branch": {"type": "string"},
+                "force": {"type": "boolean"},
+                "error": {"type": "object"},
+                "details": {"type": "object"}
+            },
+            "additionalProperties": true
+        }
+    ]
+})
 def git_push(
     repo_path: str,
     remote: str = "origin",
