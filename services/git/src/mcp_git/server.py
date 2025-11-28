@@ -422,7 +422,7 @@ def git_pull(
                 "error": {"type": "object"},
                 "details": {"type": "object"}
             },
-            "additionalProperties": true
+            "additionalProperties": True
         }
     ]
 })
