@@ -1,7 +1,7 @@
 # MCP 服务单仓库
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![MCP Git Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml)
+[![MCP Git 打包](https://github.com/Kirky-X/mcps/actions/workflows/package-git.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/package-git.yml)
 
 一个包含多种 Model Context Protocol（MCP）服务的单仓库。
 

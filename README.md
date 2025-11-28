@@ -1,7 +1,7 @@
 # MCP Services Monorepo
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![MCP Git Build](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/build-check-mcp-git.yml)
+[![MCP Git Package](https://github.com/Kirky-X/mcps/actions/workflows/package-git.yml/badge.svg)](https://github.com/Kirky-X/mcps/actions/workflows/package-git.yml)
 
 A monorepo containing multiple Model Context Protocol (MCP) services for various functionalities.
 
