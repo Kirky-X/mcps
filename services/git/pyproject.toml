@@ -3,11 +3,17 @@ name = "mcp-git"
 version = "0.1.0"
 description = "MCP module for Git operations using PyGit2"
 readme = "README.md"
+authors = [
+    { name = "Kirky-X", email = "kirky-x@outlook.com" }
+]
 requires-python = ">=3.10"
 dependencies = [
     "pygit2>=1.13.0",
     "mcp>=0.1.0",
 ]
+
+[project.scripts]
+mcp-git = "mcp_git.server:main"
 
 [project.optional-dependencies]
 dev = [
@@ -17,8 +23,9 @@ dev = [
     "mypy>=1.8.0",
 ]
 
-[project.scripts]
-mcp-git = "mcp_git.server:main"
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
 
 [build-system]
 requires = ["hatchling"]
@@ -26,6 +33,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_git"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+
+[tool.uv.sources]
+mcp-git = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
