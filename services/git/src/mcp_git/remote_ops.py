@@ -7,6 +7,15 @@ import pygit2
 from .errors import GitError, GitErrorCode
 from .read_ops import _get_repo
 
+def _build_callbacks(remote_url: str) -> Optional[pygit2.RemoteCallbacks]:
+    if remote_url.startswith("ssh://") or remote_url.startswith("git@"):
+        try:
+            creds = pygit2.KeypairFromAgent("git")
+            return pygit2.RemoteCallbacks(credentials=creds)
+        except Exception:
+            return None
+    return None
+
 def git_remote(
     repo_path: str,
     action: Literal["list", "add", "remove"],
@@ -46,8 +55,8 @@ def git_pull(
         # Get remote
         remote_obj = repo.remotes[remote]
         
-        # Fetch
-        remote_obj.fetch()
+        callbacks = _build_callbacks(remote_obj.url)
+        remote_obj.fetch(callbacks=callbacks)
         
         # Determine branch to merge
         if not branch:
@@ -119,7 +128,8 @@ def git_push(
         if force:
             refspec = f"+{refspec}"
             
-        remote_obj.push([refspec])
+        callbacks = _build_callbacks(remote_obj.url)
+        remote_obj.push([refspec], callbacks=callbacks)
         return "Push successful"
         
     except KeyError:
