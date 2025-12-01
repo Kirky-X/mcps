@@ -56,26 +56,67 @@ def _build_callbacks(remote_url: str) -> Optional[pygit2.RemoteCallbacks]:
             elif token:
                 creds = pygit2.UserPass(token, "x-oauth-basic")
             if not creds:
+                # Use Git credential helper to get credentials
                 try:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(remote_url)
+                    host = parsed.hostname
+                    protocol = parsed.scheme
+                    path = parsed.path.lstrip("/") if parsed.path else None
+                    
+                    # Construct input for git credential fill
+                    input_data = f"protocol={protocol}\nhost={host}\n"
+                    if path:
+                        input_data += f"path={path}\n"
+                    input_data += "\n"
+
+                    # Call git credential fill
                     proc = subprocess.run(
                         ["git", "credential", "fill"],
-                        input=f"url={remote_url}\n\n".encode(),
+                        input=input_data.encode(),
                         stdout=subprocess.PIPE,
                         stderr=subprocess.DEVNULL,
                         check=False
                     )
-                    out = proc.stdout.decode()
-                    u = None
-                    p = None
-                    for line in out.splitlines():
-                        if line.startswith("username="):
-                            u = line.split("=", 1)[1]
-                        elif line.startswith("password="):
-                            p = line.split("=", 1)[1]
-                    if u and p:
-                        creds = pygit2.UserPass(u, p)
+                    
+                    if proc.returncode == 0:
+                        out = proc.stdout.decode()
+                        u = None
+                        p = None
+                        for line in out.splitlines():
+                            if line.startswith("username="):
+                                u = line.split("=", 1)[1]
+                            elif line.startswith("password="):
+                                p = line.split("=", 1)[1]
+                        
+                        if u and p:
+                            creds = pygit2.UserPass(u, p)
                 except Exception:
                     pass
+                
+                # Fallback to simple URL based lookup if detailed parsing fails or returned nothing
+                if not creds:
+                    try:
+                        proc = subprocess.run(
+                            ["git", "credential", "fill"],
+                            input=f"url={remote_url}\n\n".encode(),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.DEVNULL,
+                            check=False
+                        )
+                        if proc.returncode == 0:
+                            out = proc.stdout.decode()
+                            u = None
+                            p = None
+                            for line in out.splitlines():
+                                if line.startswith("username="):
+                                    u = line.split("=", 1)[1]
+                                elif line.startswith("password="):
+                                    p = line.split("=", 1)[1]
+                            if u and p:
+                                creds = pygit2.UserPass(u, p)
+                    except Exception:
+                        pass
             if creds:
                 def _cert_check(certificate, valid, host):
                     if host and ("github.com" in host or "gitlab.com" in host or "bitbucket.org" in host):
