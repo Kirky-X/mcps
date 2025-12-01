@@ -3,6 +3,8 @@ try:
 except ImportError:
     from typing import List, Optional, Dict, Any
     from typing_extensions import Literal
+import os
+import subprocess
 import pygit2
 from .errors import GitError, GitErrorCode
 from .read_ops import _get_repo
@@ -12,6 +14,74 @@ def _build_callbacks(remote_url: str) -> Optional[pygit2.RemoteCallbacks]:
         try:
             creds = pygit2.KeypairFromAgent("git")
             return pygit2.RemoteCallbacks(credentials=creds)
+        except Exception:
+            pass
+        # Fallback to explicit key files if agent is unavailable
+        try:
+            key_path = os.getenv("SSH_KEY_PATH") or os.getenv("GIT_SSH_KEY_PATH")
+            passphrase = os.getenv("SSH_KEY_PASSPHRASE") or None
+            candidate_priv = []
+            if key_path:
+                candidate_priv.append(os.path.expanduser(key_path))
+            # Common defaults
+            candidate_priv += [
+                os.path.expanduser("~/.ssh/id_ed25519"),
+                os.path.expanduser("~/.ssh/id_rsa"),
+            ]
+            for priv in candidate_priv:
+                pub = priv + ".pub"
+                if os.path.exists(priv) and os.path.exists(pub):
+                    creds = pygit2.Keypair("git", pub, priv, passphrase)
+                    return pygit2.RemoteCallbacks(credentials=creds)
+        except Exception:
+            return None
+        # Fallback to in-memory keys via environment variables
+        try:
+            pub_mem = os.getenv("GIT_SSH_PUBLIC_KEY")
+            priv_mem = os.getenv("GIT_SSH_PRIVATE_KEY")
+            passphrase = os.getenv("SSH_KEY_PASSPHRASE") or None
+            if priv_mem and pub_mem:
+                creds = pygit2.KeypairFromMemory("git", pub_mem, priv_mem, passphrase)
+                return pygit2.RemoteCallbacks(credentials=creds)
+        except Exception:
+            return None
+    if remote_url.startswith("https://") or remote_url.startswith("http://"):
+        try:
+            username = os.getenv("GIT_HTTP_USERNAME")
+            password = os.getenv("GIT_HTTP_PASSWORD")
+            token = os.getenv("GITHUB_TOKEN") or os.getenv("GIT_PAT") or os.getenv("GH_TOKEN")
+            creds = None
+            if username and password:
+                creds = pygit2.UserPass(username, password)
+            elif token:
+                creds = pygit2.UserPass(token, "x-oauth-basic")
+            if not creds:
+                try:
+                    proc = subprocess.run(
+                        ["git", "credential", "fill"],
+                        input=f"url={remote_url}\n\n".encode(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.DEVNULL,
+                        check=False
+                    )
+                    out = proc.stdout.decode()
+                    u = None
+                    p = None
+                    for line in out.splitlines():
+                        if line.startswith("username="):
+                            u = line.split("=", 1)[1]
+                        elif line.startswith("password="):
+                            p = line.split("=", 1)[1]
+                    if u and p:
+                        creds = pygit2.UserPass(u, p)
+                except Exception:
+                    pass
+            if creds:
+                def _cert_check(certificate, valid, host):
+                    if host and ("github.com" in host or "gitlab.com" in host or "bitbucket.org" in host):
+                        return True
+                    return bool(valid)
+                return pygit2.RemoteCallbacks(credentials=creds, certificate_check=_cert_check)
         except Exception:
             return None
     return None
