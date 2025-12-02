@@ -119,7 +119,7 @@ LIBRARYMASTER_CONTEXT7_API_KEY=your_key uv run -m library.mcp_service
         "run",
         "--with",
         "git+https://github.com/Kirky-X/mcps.git#subdirectory=services/library",
-        "library-mcp"
+        "mcp-library"
       ]
     }
   }

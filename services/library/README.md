@@ -117,7 +117,7 @@ For detailed API documentation, please refer to [API Reference](API_REFERENCE.md
         "run",
         "--with",
         "git+https://github.com/Kirky-X/mcps.git#subdirectory=services/library",
-        "library-mcp"
+        "mcp-library"
       ]
     }
   }

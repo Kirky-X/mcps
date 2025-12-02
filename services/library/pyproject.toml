@@ -20,6 +20,7 @@ dependencies = [
 [project.scripts]
 library = "library.main:main"
 library-mcp = "library.mcp_service:main"
+mcp-library = "library.mcp_service:main"
 
 [project.optional-dependencies]
 dev = [
