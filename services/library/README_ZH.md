@@ -43,7 +43,7 @@ Context7 API 提供智能库搜索和文档查询功能。
 ```bash
 # 克隆仓库
 git clone https://github.com/Kirky-X/mcps.git
-cd LibraryMaster
+cd services/library
 
 # 安装 uv（如果尚未安装）
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -58,7 +58,7 @@ uv sync
 
 ```bash
 # Context7 API 配置（可选，用于文档搜索功能）
-export mcp-library_CONTEXT7_API_KEY="your_context7_api_key"
+export LIBRARYMASTER_CONTEXT7_API_KEY="your_context7_api_key"
 
 # 镜像源配置（v0.1.3 新增）
 export LIBRARYMASTER_RUST_MIRRORS="https://rsproxy.cn/crates.io-index,https://mirrors.ustc.edu.cn/crates.io-index"
@@ -74,18 +74,18 @@ export LIBRARYMASTER_MAX_RETRIES=3
 export LIBRARYMASTER_CIRCUIT_BREAKER_THRESHOLD=5
 
 # 缓存配置（可选）
-export mcp-library_CACHE_TTL=3600
-export mcp-library_CACHE_MAX_SIZE=1000
+export LIBRARYMASTER_CACHE_TTL=3600
+export LIBRARYMASTER_CACHE_MAX_SIZE=1000
 ```
 
 ### MCP 服务设置
 
 ```bash
 # 启动 MCP 服务
-uv run -m mcp-library.mcp_service
+uv run -m library.mcp_service
 
 # 或使用自定义配置
-mcp-library_CONTEXT7_API_KEY=your_key uv run -m mcp-library.mcp_service
+LIBRARYMASTER_CONTEXT7_API_KEY=your_key uv run -m library.mcp_service
 ```
 
 ## 可用的 MCP 工具
@@ -106,15 +106,21 @@ mcp-library_CONTEXT7_API_KEY=your_key uv run -m mcp-library.mcp_service
 
 详细的 API 文档请参考 [API 参考文档](API_REFERENCE.md)。
 
-### 与 MCP 客户端集成
+## ⚙️ 配置
+
+### MCP 客户端配置
 
 ```json
 {
   "mcpServers": {
     "mcp-library": {
       "command": "uv",
-      "args": ["run", "-m", "mcp-library.mcp_service"],
-      "cwd": "/path/to/LibraryMaster"
+      "args": [
+        "run",
+        "--with",
+        "git+https://github.com/Kirky-X/mcps.git#subdirectory=services/library",
+        "library-mcp"
+      ]
     }
   }
 }

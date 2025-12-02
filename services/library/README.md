@@ -1,6 +1,6 @@
 # LibraryMaster MCP
 
-[中文文档](README_zh.md) | [API Reference](API_REFERENCE.md) | [Release Notes](Release.md)
+[中文文档](README_ZH.md) | [API Reference](API_REFERENCE.md) | [Release Notes](Release.md)
 
 A powerful MCP (Model Context Protocol) service for library management and dependency operations across Python, Node.js,
 Java, Rust, Go, and C++ ecosystems, integrated with Context7 API for intelligent library search and documentation
@@ -40,7 +40,7 @@ queries.
 ```bash
 # Clone the repository
 git clone https://github.com/Kirky-X/mcps.git
-cd LibraryMaster
+cd services/library
 
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -55,7 +55,7 @@ Configure necessary environment variables before starting the service:
 
 ```bash
 # Context7 API configuration (optional, for document search features)
-export mcp-library_CONTEXT7_API_KEY="your_context7_api_key"
+export LIBRARYMASTER_CONTEXT7_API_KEY="your_context7_api_key"
 
 # Mirror source configuration (v0.1.3 new)
 export LIBRARYMASTER_RUST_MIRRORS="https://rsproxy.cn/crates.io-index,https://mirrors.ustc.edu.cn/crates.io-index"
@@ -71,18 +71,18 @@ export LIBRARYMASTER_MAX_RETRIES=3
 export LIBRARYMASTER_CIRCUIT_BREAKER_THRESHOLD=5
 
 # Cache configuration (optional)
-export mcp-library_CACHE_TTL=3600
-export mcp-library_CACHE_MAX_SIZE=1000
+export LIBRARYMASTER_CACHE_TTL=3600
+export LIBRARYMASTER_CACHE_MAX_SIZE=1000
 ```
 
 ### MCP Service Setup
 
 ```bash
 # Start MCP service
-uv run -m mcp-library.mcp_service
+uv run -m library.mcp_service
 
 # Or with custom configuration
-mcp-library_CONTEXT7_API_KEY=your_key uv run -m mcp-library.mcp_service
+LIBRARYMASTER_CONTEXT7_API_KEY=your_key uv run -m library.mcp_service
 ```
 
 ## Available MCP Tools
@@ -104,15 +104,21 @@ mcp-library_CONTEXT7_API_KEY=your_key uv run -m mcp-library.mcp_service
 
 For detailed API documentation, please refer to [API Reference](API_REFERENCE.md).
 
-### Integration with MCP Clients
+## ⚙️ Configuration
+
+### MCP Client Config
 
 ```json
 {
   "mcpServers": {
     "mcp-library": {
       "command": "uv",
-      "args": ["run", "-m", "mcp-library.mcp_service"],
-      "cwd": "/path/to/LibraryMaster"
+      "args": [
+        "run",
+        "--with",
+        "git+https://github.com/Kirky-X/mcps.git#subdirectory=services/library",
+        "library-mcp"
+      ]
     }
   }
 }

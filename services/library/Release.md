@@ -15,7 +15,7 @@
     - 清理所有 `__pycache__/` 目录
     - 移除编译后的字节码文件
 - **项目结构精简**: 优化目录结构，提升代码可维护性
-    - 保留核心源码目录 `src/mcp-library/`
+    - 保留核心源码目录 `src/library/`
     - 保留5个核心测试文件，功能完整且无冗余
     - 保留必要的配置文件和文档
 
@@ -127,7 +127,7 @@
 
 ### ⚙️ 技术细节
 
-- **版本号**: 0.1.2 → 0.1.3
+- **版本号**: 0.1.3 → 0.1.4
 - **新增环境变量**:
     - 镜像源配置: `LIBRARYMASTER_*_MIRROR_URLS`
     - 网络配置: `LIBRARYMASTER_MIRROR_FALLBACK_ENABLED`、`LIBRARYMASTER_MAX_RETRIES`等
@@ -198,10 +198,9 @@
 
 - **版本号**: 0.1.1 → 0.1.2
 - **新增核心模块**:
-    - `mcp-library.core.mirror_config`: 镜像源配置管理
-    - `mcp-library.core.failover`: 故障转移和健康检查
-- **增强模块**:
-    - `mcp-library.workers.base`: 基础Worker类镜像源支持
+    - `library.core.mirror_config`: 镜像源配置管理
+    - `library.core.failover`: 故障转移和健康检查
+    - `library.workers.base`: 基础Worker类镜像源支持
     - 所有语言特定Worker类的镜像源集成
 - **配置系统**: 支持环境变量和配置文件的镜像源配置
 - **监控系统**: 实时镜像源状态监控和健康检查
