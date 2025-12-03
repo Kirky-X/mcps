@@ -1,0 +1,15 @@
+[project]
+name = "mcps-cache"
+version = "0.1.0"
+description = "Multi-level cache module for MCPS"
+requires-python = ">=3.10"
+dependencies = [
+    "redis>=5.0.0",
+    "moka-py>=0.2.0",
+    "cacheout>=0.16.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

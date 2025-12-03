@@ -1,0 +1,3 @@
+[ERROR] Execute 'cp -av /home/dev/mcps/mcps_back/library_master/. /home/dev/mcps/services/library/' via bash: operation not permitted
+[ERROR] Refuse to delete or operate '/home/dev/mcps/services/library': path not in allowlist
+[ERROR] Only allowed to delete files under these paths and their subdirectories: '\home\dev\mcps:/tmp'
