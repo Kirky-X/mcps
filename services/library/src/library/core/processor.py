@@ -6,7 +6,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from queue import Queue
 from typing import List, Dict, Any
 
-from public.cache.cache import create_cache_manager
+try:
+    from public.cache.cache import create_cache_manager
+except Exception:
+    import os
+    import sys
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
+    from public.cache.cache import create_cache_manager
 from ..core.config import Settings
 from ..models import Task, TaskResult, BatchResponse, BatchSummary, LibraryQuery
 from ..workers import WorkerFactory

@@ -4,11 +4,12 @@
 import os
 import sys
 
-# 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, project_root)
+def main() -> None:
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+    from library.main import main as run_main
+    run_main()
 
 if __name__ == "__main__":
-    from library.main import main
-
     main()
