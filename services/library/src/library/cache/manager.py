@@ -117,8 +117,8 @@ class MultiLevelCache(BaseCache):
         except Exception as e:
             logger.warning(f"Failed to publish cache invalidation: {e}")
 
-    def generate_key(self, language: str, library: str, operation: str, version: Optional[str]) -> str:
-        return f"{language}:{library}:{operation}:{version or ''}"
+    def generate_key(self, language: str, library: str, operation: str, version: Optional[str], depth: int = 1) -> str:
+        return f"{language}:{library}:{operation}:{version or ''}:{depth}"
 
     def get(self, key: str) -> Any:
         if self.l1:

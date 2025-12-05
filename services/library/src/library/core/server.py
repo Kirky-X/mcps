@@ -62,15 +62,6 @@ class LibraryMasterServer:
             """批量查询依赖关系"""
             return await self.find_library_dependencies(libraries)
 
-        @self.mcp.tool()
-        async def get_cache_stats() -> Dict[str, Any]:
-            """获取缓存统计信息"""
-            return await self.get_cache_stats()
-
-        @self.mcp.tool()
-        async def clear_cache() -> Dict[str, Any]:
-            """清空缓存"""
-            return await self.clear_cache()
 
         # 注册 Context7 工具（如果已初始化）
         if self.context7_tools:
@@ -211,30 +202,6 @@ class LibraryMasterServer:
             self.logger.error(f"Error in find_library_dependencies: {e}")
             return {"error": str(e)}
 
-    async def get_cache_stats(self) -> Dict[str, Any]:
-        """获取缓存统计信息
-        
-        Returns:
-            缓存统计信息
-        """
-        try:
-            return self.batch_processor.get_cache_stats()
-        except Exception as e:
-            self.logger.error(f"Error in get_cache_stats: {e}")
-            return {"error": str(e)}
-
-    async def clear_cache(self) -> Dict[str, Any]:
-        """清空缓存
-        
-        Returns:
-            操作结果
-        """
-        try:
-            self.batch_processor.clear_cache()
-            return {"success": True, "message": "Cache cleared successfully"}
-        except Exception as e:
-            self.logger.error(f"Error in clear_cache: {e}")
-            return {"error": str(e)}
 
     def run(self, shutdown_event=None):
         """运行服务器"""

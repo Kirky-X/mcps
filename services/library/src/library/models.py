@@ -100,7 +100,8 @@ class LibraryQuery(BaseModel):
     name: str = Field(..., description="库名称")
     language: Language = Field(..., description="编程语言")
     version: Optional[str] = Field(None, description="版本号")
-    
+    depth: int = Field(1, ge=1, le=10, description="依赖查询深度，默认1")
+
     @field_validator('language', mode='before')
     @classmethod
     def validate_language(cls, v):
@@ -136,7 +137,8 @@ class Task(BaseModel):
     library: str = Field(..., description="库名称")
     version: Optional[str] = Field(None, description="版本号")
     operation: str = Field(..., description="操作类型")
-    
+    depth: int = Field(1, description="依赖查询深度")
+
     @field_validator('language', mode='before')
     @classmethod
     def validate_language(cls, v):
@@ -167,6 +169,9 @@ class TaskResult(BaseModel):
     execution_time: Optional[float] = Field(None, description="执行时间(秒)")
     # 为check_versions_exist操作添加的字段
     exists: Optional[bool] = Field(None, description="版本是否存在(仅用于check_versions_exist)")
+    # 为依赖分析添加的字段
+    conflicts: Optional[List[Dict[str, Any]]] = Field(None, description="版本冲突列表")
+    suggested_versions: Optional[Dict[str, str]] = Field(None, description="建议解决版本")
 
 
 class BatchRequest(BaseModel):
@@ -206,7 +211,9 @@ class ExistenceInfo(BaseModel):
 class DependencyInfo(BaseModel):
     """依赖信息"""
     name: str = Field(..., description="依赖名称")
-    version: str = Field(..., description="依赖版本")
+    version: str = Field(..., description="依赖版本约束")
+    dependencies: Optional[List['DependencyInfo']] = Field(None, description="子依赖")
+    resolved_version: Optional[str] = Field(None, description="解析后的具体版本")
 
 
 class DependenciesInfo(BaseModel):

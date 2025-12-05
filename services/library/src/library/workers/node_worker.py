@@ -43,11 +43,36 @@ class NodeWorker(BaseWorker):
     def get_dependencies(self, library: str, version: str) -> Dict[str, Any]:
         """获取Node.js包的依赖关系"""
         endpoint = f"/{library}/{version}"
-        response = self._make_request(endpoint)
-        data = response.json()
-        deps = data.get("dependencies", {})
-        dependencies = [
-            {"name": name, "version": version}
-            for name, version in deps.items()
-        ]
-        return {"dependencies": dependencies}
+        try:
+            response = self._make_request(endpoint)
+            data = response.json()
+            
+            # 记录实际版本
+            actual_version = data.get("version", version)
+            
+            deps = data.get("dependencies", {})
+            dependencies = [
+                {"name": name, "version": version}
+                for name, version in deps.items()
+            ]
+            return {"dependencies": dependencies, "version": actual_version}
+        except LibraryNotFoundError:
+             # 尝试获取最新版
+             try:
+                 endpoint = f"/{library}"
+                 response = self._make_request(endpoint)
+                 data = response.json()
+                 latest_ver = data["dist-tags"]["latest"]
+                 # 获取最新版本的详细信息
+                 version_data = data.get("versions", {}).get(latest_ver, {})
+                 deps = version_data.get("dependencies", {})
+                 dependencies = [
+                    {"name": name, "version": version}
+                    for name, version in deps.items()
+                 ]
+                 return {"dependencies": dependencies, "version": latest_ver}
+             except Exception:
+                 return {"dependencies": []}
+        except Exception as e:
+             self.logger.warning(f"Failed to get dependencies for {library}@{version}: {e}")
+             return {"dependencies": []}

@@ -93,8 +93,6 @@ LIBRARYMASTER_CONTEXT7_API_KEY=your_key uv run -m library.mcp_service
 - **`check_versions_exist`** - Verify if specific library versions exist
 - **`find_library_docs`** - Get official documentation URLs
 - **`find_library_dependencies`** - Retrieve dependency information
-- **`get_cache_stats`** - Get cache statistics
-- **`clear_cache`** - Clear cache data
 
 ### Context7 Intelligent Search Tools
 

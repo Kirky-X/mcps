@@ -145,24 +145,6 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                 },
                 "required": ["libraries"]
             }
-        ),
-        Tool(
-            name="get_cache_stats",
-            description="获取缓存统计信息",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-                "additionalProperties": False
-            }
-        ),
-        Tool(
-            name="clear_cache",
-            description="清空所有缓存",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-                "additionalProperties": False
-            }
         )
     ]
 

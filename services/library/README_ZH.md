@@ -96,8 +96,6 @@ LIBRARYMASTER_CONTEXT7_API_KEY=your_key uv run -m library.mcp_service
 - **`check_versions_exist`** - 验证特定库版本是否存在
 - **`find_library_docs`** - 获取官方文档 URL
 - **`find_library_dependencies`** - 检索依赖信息
-- **`get_cache_stats`** - 获取缓存统计信息
-- **`clear_cache`** - 清空缓存数据
 
 ### Context7 智能搜索工具
 

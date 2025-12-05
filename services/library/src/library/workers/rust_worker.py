@@ -42,11 +42,21 @@ class RustWorker(BaseWorker):
 
     def get_dependencies(self, library: str, version: str) -> Dict[str, Any]:
         """获取Rust库的依赖关系"""
+        # Rust API 需要具体版本
+        if not version or any(c in version for c in "><=*^~"):
+             # 如果不是具体版本，先获取最新版
+             latest = self.get_latest_version(library)
+             version = latest["version"]
+
         endpoint = f"/crates/{library}/{version}/dependencies"
-        response = self._make_request(endpoint)
-        data = response.json()
-        dependencies = [
-            {"name": dep["crate_id"], "version": dep["req"]}
-            for dep in data["dependencies"]
-        ]
-        return {"dependencies": dependencies}
+        try:
+            response = self._make_request(endpoint)
+            data = response.json()
+            dependencies = [
+                {"name": dep["crate_id"], "version": dep["req"]}
+                for dep in data["dependencies"]
+            ]
+            return {"dependencies": dependencies, "version": version}
+        except Exception as e:
+            self.logger.warning(f"Failed to get dependencies for {library}@{version}: {e}")
+            return {"dependencies": []}

@@ -148,39 +148,84 @@ class JavaWorker(BaseWorker):
             self.logger.error(f"Error fetching POM for {group_id}:{artifact_id}:{version}: {e}")
             return None
 
-    def _extract_dependencies_from_pom(self, pom_root: ET.Element) -> List[str]:
+    def _extract_dependencies_from_pom(self, pom_root: ET.Element) -> List[Dict[str, str]]:
         """从POM文件中提取依赖"""
         dependencies = []
 
         try:
-            # 定义XML命名空间
-            ns = {'maven': 'http://maven.apache.org/POM/4.0.0'}
+            # 确定XML命名空间
+            # 很多POM文件根节点是 {http://maven.apache.org/POM/4.0.0}project
+            # 我们需要处理有无namespace的情况
+            ns_url = 'http://maven.apache.org/POM/4.0.0'
+            ns = {'maven': ns_url}
+            
+            def get_tag_name(tag):
+                if '}' in tag:
+                    return tag.split('}', 1)[1]
+                return tag
+
+            # 提取properties
+            properties = {}
+            
+            # 尝试查找properties节点，考虑多种路径
+            props_elem = pom_root.find(f'{{{ns_url}}}properties')
+            if props_elem is None:
+                props_elem = pom_root.find('properties')
+            
+            if props_elem is not None:
+                for prop in props_elem:
+                    tag = get_tag_name(prop.tag)
+                    if prop.text:
+                        properties[tag] = prop.text
 
             # 查找dependencies节点
-            deps_element = pom_root.find('.//maven:dependencies', ns)
+            deps_element = pom_root.find(f'{{{ns_url}}}dependencies')
             if deps_element is None:
-                # 尝试不使用命名空间
-                deps_element = pom_root.find('.//dependencies')
+                deps_element = pom_root.find('dependencies')
 
             if deps_element is not None:
-                for dep in deps_element.findall('.//dependency', ns) or deps_element.findall('.//dependency'):
-                    group_id_elem = dep.find('groupId', ns) or dep.find('groupId')
-                    artifact_id_elem = dep.find('artifactId', ns) or dep.find('artifactId')
-                    scope_elem = dep.find('scope', ns) or dep.find('scope')
+                # 遍历所有dependency子节点
+                for dep in deps_element:
+                    # 确保只处理 dependency 标签
+                    if get_tag_name(dep.tag) != 'dependency':
+                        continue
+                        
+                    group_id = None
+                    artifact_id = None
+                    version = "latest"
+                    scope = "compile"
+                    
+                    for child in dep:
+                        tag = get_tag_name(child.tag)
+                        if tag == 'groupId':
+                            group_id = child.text
+                        elif tag == 'artifactId':
+                            artifact_id = child.text
+                        elif tag == 'version':
+                            version = child.text
+                        elif tag == 'scope':
+                            scope = child.text
 
-                    if group_id_elem is not None and artifact_id_elem is not None:
-                        group_id = group_id_elem.text
-                        artifact_id = artifact_id_elem.text
-                        scope = scope_elem.text if scope_elem is not None else 'compile'
+                    if group_id and artifact_id:
+                        # 解析版本号中的属性引用
+                        if version and version.startswith('${') and version.endswith('}'):
+                            prop_name = version[2:-1]
+                            # 尝试从本地properties解析
+                            version = properties.get(prop_name, version)
+                            # 如果解析失败，保留原样
 
                         # 只返回compile和runtime scope的依赖
-                        if scope in ['compile', 'runtime']:
-                            dependencies.append(f"{group_id}:{artifact_id}")
+                        # 注意: 如果scope为None，默认为compile
+                        if not scope or scope in ['compile', 'runtime']:
+                            dependencies.append({
+                                "name": f"{group_id}:{artifact_id}",
+                                "version": version
+                            })
 
         except Exception as e:
             self.logger.error(f"Error extracting dependencies from POM: {e}")
 
-        return dependencies[:10]  # 限制返回10个依赖
+        return dependencies[:20]  # 限制返回20个依赖
 
     def get_latest_version(self, library: str) -> Dict[str, Any]:
         """Get the latest version of a Java library using Maven Central Search API with intelligent matching."""
@@ -423,10 +468,15 @@ class JavaWorker(BaseWorker):
             if pom_root is None:
                 self.logger.warning(f"POM file not found for {group_id}:{artifact_id}:{version}")
                 return {"dependencies": []}
-
+            
             # 从POM文件中提取依赖
             dependencies = self._extract_dependencies_from_pom(pom_root)
-            return {"dependencies": dependencies}
+            
+            # 确保返回格式符合预期 (List[Dict]) 并包含当前版本
+            return {
+                "dependencies": dependencies,
+                "version": version
+            }
 
         except Exception as e:
             self.logger.error(f"Error getting dependencies for {library}: {e}")

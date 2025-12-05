@@ -312,43 +312,7 @@ LibraryMaster MCP 服务提供了一套完整的多语言库管理工具，支�
 
 ## Cache Management Tools
 
-### get_cache_stats
-
-获取缓存统计信息。
-
-#### Parameters
-
-无参数。
-
-#### Response Format
-
-```json
-{
-  "cache_stats": {
-    "total_entries": 150,
-    "hit_rate": 0.85,
-    "memory_usage": "2.5MB",
-    "last_cleanup": "2023-12-01T10:30:00Z"
-  }
-}
-```
-
-### clear_cache
-
-清空所有缓存数据。
-
-#### Parameters
-
-无参数。
-
-#### Response Format
-
-```json
-{
-  "message": "Cache cleared successfully",
-  "cleared_entries": 150
-}
-```
+（已移除缓存管理工具接口）
 
 ## Language-Specific Features
 

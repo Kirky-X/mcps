@@ -135,6 +135,12 @@ class GoWorker(BaseWorker):
         Returns:
             包含依赖信息的字典
         """
+        # 处理版本约束：如果不是具体版本（包含 >< 等符号），或者为空
+        # Go模块通常使用语义化版本，且通常指定具体版本，但也可能传入latest
+        if not version or version == 'latest' or any(c in version for c in "><=*^~"):
+             latest = self.get_latest_version(library)
+             version = latest["version"]
+
         normalized_version = self._normalize_version(version)
         url = f"{self._get_library_url(library)}/@v/{normalized_version}.mod"
 
@@ -148,7 +154,8 @@ class GoWorker(BaseWorker):
                 "dependencies": [
                     {"name": dep[0], "version": dep[1]}
                     for dep in dependencies
-                ]
+                ],
+                "version": normalized_version
             }
 
         except Exception as e:
