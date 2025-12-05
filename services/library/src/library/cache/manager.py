@@ -8,7 +8,6 @@ from datetime import timedelta
 
 from .base import BaseCache
 from .l1_moka import MokaCache
-from .l2_redis import RedisCache
 from .config import CacheConfig
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ class MultiLevelCache(BaseCache):
         self.instance_id = str(uuid.uuid4())
         
         self.l1: Optional[BaseCache] = None
-        self.l2: Optional[RedisCache] = None
+        self.l2: Optional[Any] = None
         
         if self.config.L1_ENABLED:
             self.l1 = MokaCache(
@@ -30,7 +29,8 @@ class MultiLevelCache(BaseCache):
         l2_init_failed = False
         if self.config.L2_ENABLED:
             try:
-                self.l2 = RedisCache(
+                from .l2_redis import RedisCache as _RedisCache
+                self.l2 = _RedisCache(
                     host=self.config.REDIS_HOST,
                     port=self.config.REDIS_PORT,
                     db=self.config.REDIS_DB,
@@ -38,7 +38,7 @@ class MultiLevelCache(BaseCache):
                     default_ttl=self.config.L2_TTL,
                     key_prefix=self.config.CACHE_PREFIX
                 )
-                if self.config.AUTO_DETECT_REDIS:
+                if self.config.AUTO_DETECT_REDIS and getattr(self.l2, "_redis", None):
                     try:
                         self.l2._redis.ping()
                     except Exception as ping_err:
@@ -46,7 +46,7 @@ class MultiLevelCache(BaseCache):
                         l2_init_failed = True
                         self.l2 = None
             except Exception as e:
-                logger.warning(f"Redis initialization failed: {e}")
+                logger.warning(f"Redis initialization failed (or module missing): {e}")
                 l2_init_failed = True
                 self.l2 = None
 

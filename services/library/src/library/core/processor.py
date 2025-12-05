@@ -7,11 +7,10 @@ from queue import Queue
 from typing import List, Dict, Any
 
 try:
-    from public.cache.cache import create_cache_manager
+    from ..cache import create_cache_manager
 except Exception:
-    # Fallback to vendored cache within services/library
     try:
-        from ..cache import create_cache_manager
+        from public.cache.cache import create_cache_manager
     except Exception:
         import os
         import sys

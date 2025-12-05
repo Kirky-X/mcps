@@ -1,4 +1,7 @@
-import redis
+try:
+    import redis  # type: ignore
+except Exception:
+    redis = None
 import pickle
 from typing import Any, Optional, Union, Dict
 from datetime import timedelta
@@ -21,18 +24,24 @@ class RedisCache(BaseCache):
         if redis_client:
             self._redis = redis_client
         else:
-            self._redis = redis.Redis(
-                host=host,
-                port=port,
-                db=db,
-                password=password,
-                decode_responses=False
-            )
+            if redis is None:
+                # mark unavailable
+                self._redis = None  # type: ignore
+            else:
+                self._redis = redis.Redis(
+                    host=host,
+                    port=port,
+                    db=db,
+                    password=password,
+                    decode_responses=False
+                )
 
     def _make_key(self, key: str) -> str:
         return f"{self.key_prefix}{key}"
 
     def get(self, key: str) -> Any:
+        if not self._redis:
+            return None
         data = self._redis.get(self._make_key(key))
         if data is None:
             return None
@@ -51,15 +60,23 @@ class RedisCache(BaseCache):
         else:
             ttl_seconds = int(ttl)
             
+        if not self._redis:
+            return
         self._redis.setex(self._make_key(key), ttl_seconds, dumped)
 
     def delete(self, key: str) -> None:
+        if not self._redis:
+            return
         self._redis.delete(self._make_key(key))
 
     def exists(self, key: str) -> bool:
+        if not self._redis:
+            return False
         return bool(self._redis.exists(self._make_key(key)))
 
     def clear(self) -> None:
+        if not self._redis:
+            return
         cursor = '0'
         pattern = f"{self.key_prefix}*"
         while cursor != 0:
@@ -68,12 +85,16 @@ class RedisCache(BaseCache):
                 self._redis.delete(*keys)
 
     def close(self) -> None:
-        self._redis.close()
+        if self._redis:
+            self._redis.close()
 
     def get_stats(self) -> Dict[str, Any]:
+        if not self._redis:
+            return {"type": "redis", "available": False}
         info = self._redis.info()
         return {
             "type": "redis",
+            "available": True,
             "used_memory": info.get("used_memory_human"),
             "connected_clients": info.get("connected_clients"),
             "db_keys": self._redis.dbsize()
