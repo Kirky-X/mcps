@@ -1,7 +1,10 @@
 try:
     import redis  # type: ignore
 except Exception:
-    redis = None
+    class _RedisUnavailable:
+        def __getattr__(self, name):
+            raise AttributeError("redis module unavailable")
+    redis = _RedisUnavailable()  # type: ignore
 import pickle
 from typing import Any, Optional, Union, Dict
 from datetime import timedelta
@@ -16,18 +19,15 @@ class RedisCache(BaseCache):
         password: Optional[str] = None,
         default_ttl: int = 3600,
         key_prefix: str = "cache:",
-        redis_client: Optional[redis.Redis] = None
+        redis_client: Optional[Any] = None
     ):
         self.default_ttl = default_ttl
         self.key_prefix = key_prefix
         
-        if redis_client:
+        if redis_client is not None:
             self._redis = redis_client
         else:
-            if redis is None:
-                # mark unavailable
-                self._redis = None  # type: ignore
-            else:
+            try:
                 self._redis = redis.Redis(
                     host=host,
                     port=port,
@@ -35,6 +35,8 @@ class RedisCache(BaseCache):
                     password=password,
                     decode_responses=False
                 )
+            except Exception:
+                self._redis = None  # type: ignore
 
     def _make_key(self, key: str) -> str:
         return f"{self.key_prefix}{key}"

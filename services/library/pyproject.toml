@@ -1,6 +1,6 @@
 [project]
 name = "mcp-library"
-version = "0.1.4"
+version = "0.1.5"
 description = "Multi-language Code Package (MCP) latest version query service"
 readme = "README.md"
 authors = [
@@ -15,6 +15,7 @@ dependencies = [
     "typing-extensions>=4.15.0",
     "requests>=2.32.5",
     "cacheout>=0.16.0",
+    "redis>=6.0",
 ]
 
 [project.scripts]
