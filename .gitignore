@@ -7,3 +7,5 @@ services/git/uv.lock
 services/git/src/mcp_git/__pycache__
 __pycache__
 *.pyc
+services/library/IMPLEMENTATION_PLAN.md
+services/library/API_REFERENCE.md
