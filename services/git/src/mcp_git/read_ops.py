@@ -13,6 +13,60 @@ if not hasattr(pygit2, "GIT_OBJ_COMMIT") and hasattr(pygit2, "GIT_OBJECT_COMMIT"
     pygit2.GIT_OBJ_COMMIT = pygit2.GIT_OBJECT_COMMIT
 from .errors import GitError, GitErrorCode
 
+def _get_libgit2_version():
+    try:
+        v = getattr(pygit2, "libgit2_version", None)
+        if callable(v):
+            r = v()
+            if isinstance(r, (tuple, list)):
+                try:
+                    return ".".join(str(x) for x in r)
+                except Exception:
+                    pass
+            if isinstance(r, str):
+                return r
+        if isinstance(v, (tuple, list)):
+            try:
+                return ".".join(str(x) for x in v)
+            except Exception:
+                pass
+        M = getattr(pygit2, "LIBGIT2_VER_MAJOR", None)
+        m = getattr(pygit2, "LIBGIT2_VER_MINOR", None)
+        r = getattr(pygit2, "LIBGIT2_VER_REVISION", None)
+        if isinstance(M, int) and isinstance(m, int) and isinstance(r, int):
+            return f"{M}.{m}.{r}"
+        import ctypes, ctypes.util
+        name = ctypes.util.find_library("git2")
+        lib = None
+        if name:
+            try:
+                lib = ctypes.CDLL(name)
+            except Exception:
+                lib = None
+        else:
+            for candidate in ("libgit2.so", "libgit2.so.1", "libgit2.dylib", "git2.dll"):
+                try:
+                    lib = ctypes.CDLL(candidate)
+                    break
+                except Exception:
+                    pass
+        if lib:
+            try:
+                major = ctypes.c_int()
+                minor = ctypes.c_int()
+                rev = ctypes.c_int()
+                func = getattr(lib, "git_libgit2_version", None)
+                if func:
+                    func.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+                    func.restype = None
+                    func(ctypes.byref(major), ctypes.byref(minor), ctypes.byref(rev))
+                    return f"{major.value}.{minor.value}.{rev.value}"
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return None
+
 def _get_repo(repo_path: str) -> pygit2.Repository:
     try:
         return pygit2.Repository(repo_path)
@@ -70,12 +124,7 @@ def git_health_check(repo_path: str) -> Dict[str, Any]:
 
         # Versions
         py_version = getattr(pygit2, "__version__", None)
-        libgit2_ver = getattr(pygit2, "libgit2_version", None)
-        if callable(libgit2_ver):
-            try:
-                libgit2_ver = libgit2_ver()
-            except Exception:
-                libgit2_ver = None
+        libgit2_ver = _get_libgit2_version()
 
         return {
             "status": "healthy",
