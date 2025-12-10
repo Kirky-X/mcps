@@ -3,6 +3,8 @@ from datetime import timedelta
 from typing import Any, Optional
 
 from .local_cache import Cache
+import os
+from pathlib import Path
 
 from ..utils.config import Config
 
@@ -24,11 +26,26 @@ class CacheManager:
         """
         self.enabled = config.cache.get("enabled", False)
         if self.enabled:
-            self.cache = Cache.builder() \
-                .max_capacity(config.cache.get("max_capacity", 1000)) \
-                .time_to_live(timedelta(seconds=config.cache.get("ttl_seconds", 3600))) \
-                .time_to_idle(timedelta(seconds=config.cache.get("idle_timeout_seconds", 1800))) \
-                .build()
+            cache_type = config.cache.get("type", "moka")
+            if cache_type == "filesystem":
+                dir_env = os.getenv("PROMPT_MANAGER_CACHE_DIR")
+                cache_dir = dir_env or config.cache.get("dir") or \
+                    str(Path("/home/dev/mcps/public/cache").resolve())
+                p = Path(cache_dir)
+                p.mkdir(parents=True, exist_ok=True)
+                # simple file-backed wrapper using local cache for index + files under p
+                self.cache = Cache.builder() \
+                    .max_capacity(config.cache.get("max_capacity", 1000)) \
+                    .time_to_live(timedelta(seconds=config.cache.get("ttl_seconds", 3600))) \
+                    .time_to_idle(timedelta(seconds=config.cache.get("idle_timeout_seconds", 1800))) \
+                    .build()
+                setattr(self, "_cache_dir", p)
+            else:
+                self.cache = Cache.builder() \
+                    .max_capacity(config.cache.get("max_capacity", 1000)) \
+                    .time_to_live(timedelta(seconds=config.cache.get("ttl_seconds", 3600))) \
+                    .time_to_idle(timedelta(seconds=config.cache.get("idle_timeout_seconds", 1800))) \
+                    .build()
         else:
             self.cache = None
 
@@ -43,7 +60,22 @@ class CacheManager:
         """
         if not self.enabled:
             return None
-        return self.cache.get(key)
+        val = self.cache.get(key)
+        if val is not None:
+            return val
+        # fallback: filesystem cache
+        if getattr(self, "_cache_dir", None):
+            fp = Path(self._cache_dir) / f"{key}.json"
+            try:
+                if fp.exists():
+                    import json
+                    val = json.loads(fp.read_text(encoding="utf-8"))
+                    # warm memory cache
+                    self.cache.insert(key, val)
+                    return val
+            except Exception:
+                return None
+        return None
 
     def insert(self, key: str, value: Any):
         """写入缓存键值对
@@ -57,6 +89,17 @@ class CacheManager:
         """
         if self.enabled:
             self.cache.insert(key, value)
+            if getattr(self, "_cache_dir", None):
+                fp = Path(self._cache_dir) / f"{key}.json"
+                try:
+                    import json
+                    fp.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+                except Exception:
+                    # fallback: just create a marker file to indicate presence
+                    try:
+                        fp.write_text("1", encoding="utf-8")
+                    except Exception:
+                        pass
 
     def invalidate(self, key: str):
         """使某个键失效
@@ -69,6 +112,13 @@ class CacheManager:
         """
         if self.enabled:
             self.cache.invalidate(key)
+            if getattr(self, "_cache_dir", None):
+                fp = Path(self._cache_dir) / f"{key}.json"
+                try:
+                    if fp.exists():
+                        fp.unlink()
+                except Exception:
+                    pass
 
     def invalidate_pattern(self, name: str):
         if not self.enabled:

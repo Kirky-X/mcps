@@ -67,11 +67,13 @@ export PROMPT_MANAGER_CACHE_TTL=3600
 ### MCP Service Setup
 
 ```bash
-# Start MCP service (Claude)
-uv run -m prompt_manager.mcp_server
+# Start HTTP service
+uv run prompt-manager
 
-# Or with custom configuration
-PROMPT_MANAGER_DB_PATH=./custom.db uv run -m prompt_manager.mcp_server
+# Environment-driven prompt injection and cache dir
+export PROMPT_MANAGER_PROMPT="Your prompt text"
+export PROMPT_MANAGER_CACHE_DIR="/home/dev/mcps/public/cache"
+uv run prompt-manager
 ```
 
 ## Available MCP Tools

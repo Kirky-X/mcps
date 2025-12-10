@@ -8,10 +8,11 @@ supabase_key = "${SUPABASE_KEY}"
 
 [cache]
 enabled = true
-type = "moka"
+type = "filesystem"
 max_capacity = 1000
 ttl_seconds = 3600
 idle_timeout_seconds = 1800
+dir = "${PROMPT_MANAGER_CACHE_DIR}"
 
 [concurrency]
 queue_enabled = true
@@ -40,3 +41,8 @@ console_output = true
 enabled = true
 host = "0.0.0.0"
 port = 8000
+
+[prompt]
+text = "${PROMPT_MANAGER_PROMPT}"
+namespace = "default"
+tags = []
