@@ -1,0 +1,30 @@
+name: pgvector RPC verification
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pgvector-rpc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Docker version
+        run: docker --version
+
+      - name: Run pgvector RPC verify
+        run: bash scripts/pgvector_rpc_verify.sh
+
+      - name: Assert RPC returns rows
+        run: |
+          set -euo pipefail
+          docker exec pgvector-test psql -U postgres -d postgres -tAc "SELECT COUNT(*) FROM match_items('[0.1,0.2,0.2]', 0.0, 5)" | {
+            read -r cnt; 
+            echo "Rows: $cnt"; 
+            test "${cnt}" -gt 0; 
+          }
+
+      - name: Print connection info
+        run: echo "pgvector RPC workflow completed"

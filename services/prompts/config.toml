@@ -1,0 +1,42 @@
+[database]
+type = "sqlite"
+path = "${PROMPT_MANAGER_DB_PATH}"
+pool_size = 10
+max_overflow = 20
+supabase_url = "${SUPABASE_URL}"
+supabase_key = "${SUPABASE_KEY}"
+
+[cache]
+enabled = true
+type = "moka"
+max_capacity = 1000
+ttl_seconds = 3600
+idle_timeout_seconds = 1800
+
+[concurrency]
+queue_enabled = true
+queue_max_size = 100
+optimistic_lock_enabled = true
+
+[vector]
+enabled = true
+# dimension = 1536  # Optional: if not set, will be inferred from model output
+embedding_model = "text-embedding-ada-002"
+embedding_api_key = "${OPENAI_API_KEY}"
+provider_priority = "remote_first"
+local_model_id = "BAAI/bge-m3"
+use_modelscope = true
+batch_size = 12
+max_length = 8192
+
+[logging]
+level = "INFO"
+file_path = "./prompt_manager.log"
+max_size_mb = 10
+backup_count = 5
+console_output = true
+
+[api.http]
+enabled = true
+host = "0.0.0.0"
+port = 8000

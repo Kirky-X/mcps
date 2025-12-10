@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: testdb
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  init:
+    image: postgres:15
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["bash", "-lc", "psql -h postgres -U testuser -d testdb -c 'SELECT 1' "]
+    environment:
+      PGPASSWORD: testpass
+volumes:
+  pgdata:

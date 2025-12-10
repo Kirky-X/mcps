@@ -1,0 +1,8 @@
+Alembic migrations for Prompt Manager
+
+Usage:
+- set DATABASE_URL env var, e.g. sqlite:///./prompt_manager.db or postgresql+psycopg2://user:pass@host/db
+- Initialize: alembic revision --autogenerate -m "init"
+- Upgrade: alembic upgrade head
+- Downgrade: alembic downgrade -1
+
