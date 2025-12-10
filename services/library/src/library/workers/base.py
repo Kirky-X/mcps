@@ -19,10 +19,12 @@ class BaseWorker(ABC):
     def __init__(self, language: Language, timeout: float = 60.0):
         self.language = language
         # 增加超时时间和重试配置
+        # 使用统一的总/连接/读取超时，避免过长的连接与读取阻塞
         self.client = httpx.Client(
-            timeout=httpx.Timeout(timeout, connect=30.0, read=30.0),
+            timeout=httpx.Timeout(timeout, connect=timeout, read=timeout),
             limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
-            transport=httpx.HTTPTransport(retries=3)
+            # 避免与内部重试叠加，传输层不再额外重试
+            transport=httpx.HTTPTransport(retries=0)
         )
         self.base_url = self._get_base_url()
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -34,9 +36,9 @@ class BaseWorker(ABC):
         # 获取有效的URL列表
         self.effective_urls = self.mirror_config.get_effective_urls(language)
 
-        # 重试配置
-        self.max_retries = 3
-        self.retry_delay = 1.0
+        # 重试配置（由我们控制，避免与传输层重复叠加）
+        self.max_retries = 2
+        self.retry_delay = 0.5
 
     @abstractmethod
     def _get_base_url(self) -> str:
@@ -144,7 +146,7 @@ class BaseWorker(ABC):
                     self.logger.warning(f"Network error for {full_url}: {str(e)} (attempt {retry_count + 1})")
                     last_exception = TimeoutError(f"Network error: {str(e)}")
                     if retry_count < self.max_retries - 1:
-                        time.sleep(self.retry_delay * (retry_count + 1))  # 指数退避
+                        time.sleep(self.retry_delay * (retry_count + 1))
                         continue
 
                 except Exception as e:

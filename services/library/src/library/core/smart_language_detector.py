@@ -250,10 +250,13 @@ class SmartLanguageDetector:
     
     def _fuzzy_match_language(self, text: str) -> Optional[str]:
         """模糊匹配语言
-        
+    
         使用编辑距离等算法进行模糊匹配
         """
-        return self.language_mapper.suggest_language_corrections(text, max_suggestions=1)
+        suggestions = self.language_mapper.suggest_corrections(text)
+        if suggestions:
+            return suggestions[0]
+        return None
     
     def resolve_language_ecosystem_confusion(
         self, 
@@ -336,20 +339,14 @@ class SmartLanguageDetector:
         
         if detected_language:
             return detected_language
-        
+
         # 如果检测失败，提供详细的错误信息和建议
-        suggestions = self.language_mapper.suggest_language_corrections(language_input)
+        suggestions = self.language_mapper.suggest_corrections(language_input)
+        suggestion_msg = f". Did you mean: {', '.join(suggestions)}?" if suggestions else ""
         
-        error_msg = f"Unable to identify language: '{language_input}'"
-        if suggestions:
-            error_msg += f". Did you mean: {', '.join(suggestions)}?"
-        
-        error_msg += f" Supported languages: {', '.join([lang.value for lang in Language])}"
-        
-        if additional_context:
-            error_msg += f" Context: {additional_context}"
-        
-        raise ValueError(error_msg)
+        raise ValueError(
+            f"Unsupported or unrecognized language: '{language_input}'{suggestion_msg}"
+        )
 
 
 # 全局实例

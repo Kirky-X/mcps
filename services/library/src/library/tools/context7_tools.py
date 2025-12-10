@@ -237,6 +237,11 @@ def create_context7_tools(settings: Settings = None) -> Context7Tools:
 
     # 检查是否提供了 API 密钥
     if not settings.context7_api_key:
-        raise ValueError("Context7 API key is required but not provided in settings")
+        # 尝试从环境变量获取
+        import os
+        settings.context7_api_key = os.getenv("CONTEXT7_KEY")
+        
+        if not settings.context7_api_key:
+            raise ValueError("Context7 API key is required but not provided in settings")
 
     return Context7Tools(settings)

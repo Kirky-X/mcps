@@ -100,7 +100,7 @@ class LibraryQuery(BaseModel):
     name: str = Field(..., description="库名称")
     language: Language = Field(..., description="编程语言")
     version: Optional[str] = Field(None, description="版本号")
-    depth: int = Field(1, ge=1, le=10, description="依赖查询深度，默认1")
+    depth: Optional[str] = Field("1", description="依赖查询深度，可为数字字符串或 'unbounded'")
 
     @field_validator('language', mode='before')
     @classmethod
@@ -115,6 +115,26 @@ class LibraryQuery(BaseModel):
             return v
         else:
             raise ValueError(f"Language must be a string or Language enum, got {type(v)}")
+
+    @field_validator('depth', mode='before')
+    @classmethod
+    def validate_depth(cls, v):
+        if v is None:
+            return "1"
+        if isinstance(v, int):
+            return str(v)
+        if isinstance(v, str):
+            s = v.strip().lower()
+            if s in {"unbounded", "inf", "infinite"}:
+                return "unbounded"
+            try:
+                n = int(s)
+                if n < 1:
+                    raise ValueError("depth must be >= 1 or 'unbounded'")
+                return str(n)
+            except ValueError:
+                raise ValueError("depth must be an integer string or 'unbounded'")
+        raise ValueError("depth must be a string/int or 'unbounded'")
     
     model_config = ConfigDict(
         use_enum_values=True,
@@ -137,7 +157,7 @@ class Task(BaseModel):
     library: str = Field(..., description="库名称")
     version: Optional[str] = Field(None, description="版本号")
     operation: str = Field(..., description="操作类型")
-    depth: int = Field(1, description="依赖查询深度")
+    depth: Optional[str] = Field("1", description="依赖查询深度，可为数字字符串或 'unbounded'")
 
     @field_validator('language', mode='before')
     @classmethod
@@ -149,6 +169,26 @@ class Task(BaseModel):
             return v
         else:
             raise ValueError(f"Language must be a string or Language enum, got {type(v)}")
+
+    @field_validator('depth', mode='before')
+    @classmethod
+    def validate_depth(cls, v):
+        if v is None:
+            return "1"
+        if isinstance(v, int):
+            return str(v)
+        if isinstance(v, str):
+            s = v.strip().lower()
+            if s in {"unbounded", "inf", "infinite"}:
+                return "unbounded"
+            try:
+                n = int(s)
+                if n < 1:
+                    raise ValueError("depth must be >= 1 or 'unbounded'")
+                return str(n)
+            except ValueError:
+                raise ValueError("depth must be an integer string or 'unbounded'")
+        raise ValueError("depth must be a string/int or 'unbounded'")
     
     model_config = ConfigDict(use_enum_values=True)
 

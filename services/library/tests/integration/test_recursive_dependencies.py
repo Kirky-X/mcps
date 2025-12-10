@@ -15,7 +15,7 @@ async def test_recursive_dependencies_python():
         name="flask",
         language="python",
         version="3.0.0",
-        depth=2
+        depth="unbounded"
     )
     
     response = await processor.process_batch([query], "find_library_dependencies")
@@ -80,7 +80,7 @@ async def test_recursive_dependencies_node():
         name="express",
         language="node",
         version="4.18.2",
-        depth=2
+        depth="unbounded"
     )
     
     response = await processor.process_batch([query], "find_library_dependencies")
@@ -113,7 +113,7 @@ async def test_recursive_dependencies_java():
         name="org.apache.httpcomponents:httpclient",
         language="java",
         version="4.5.13",
-        depth=2
+        depth="unbounded"
     )
     
     response = await processor.process_batch([query], "find_library_dependencies")
@@ -149,7 +149,7 @@ async def test_recursive_dependencies_go():
         name="github.com/gin-gonic/gin",
         language="go",
         version="v1.9.0",
-        depth=2
+        depth="unbounded"
     )
     
     response = await processor.process_batch([query], "find_library_dependencies")
@@ -180,7 +180,7 @@ async def test_recursive_dependencies_rust():
         name="tokio",
         language="rust",
         version="1.0.0",
-        depth=2
+        depth="unbounded"
     )
     
     response = await processor.process_batch([query], "find_library_dependencies")
@@ -200,4 +200,3 @@ async def test_recursive_dependencies_rust():
             break
             
     assert has_nested, "Should have found nested dependencies for Rust tokio"
-

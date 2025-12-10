@@ -31,6 +31,9 @@ default = true
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.envs.default]
+env-vars = { PYTHONDONTWRITEBYTECODE = "1" }
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_git"]
 
@@ -47,7 +50,7 @@ mcp-git = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=mcp_git --cov-report=term-missing:skip-covered --cov-fail-under=78"
+addopts = "--cov=mcp_git --cov-report=term-missing:skip-covered --cov-fail-under=78 -p no:cacheprovider --benchmark-disable"
 
 [tool.ruff]
 line-length = 120

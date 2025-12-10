@@ -1,7 +1,7 @@
 """MCP LibraryMaster服务器"""
 
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import Tool
@@ -28,8 +28,14 @@ class LibraryMasterServer:
 
         # 初始化 Context7 工具（如果配置了 API 密钥）
         self.context7_tools = None
-        if getattr(settings, 'context7_api_key', None):
+        # 优先检查 settings.context7_api_key，如果为空则尝试从环境变量获取
+        import os
+        api_key = getattr(settings, 'context7_api_key', None) or os.getenv("CONTEXT7_KEY")
+        if api_key:
             try:
+                # 确保 settings 中也有 key
+                if not getattr(settings, 'context7_api_key', None):
+                    settings.context7_api_key = api_key
                 self.context7_tools = create_context7_tools(settings)
                 self.logger.info("Context7 tools initialized successfully")
             except Exception as e:
@@ -43,24 +49,32 @@ class LibraryMasterServer:
         # 直接使用装饰器注册工具
 
         @self.mcp.tool()
-        async def find_latest_versions(libraries: List[Dict[str, str]]) -> Dict[str, Any]:
-            """批量查询最新版本"""
-            return await self.find_latest_versions(libraries)
+        async def find_latest_versions(libraries: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+            return await self.find_latest_versions(libraries) if libraries else {
+                "error": "参数 'libraries' 必填",
+                "example": {"libraries": [{"name": "requests", "language": "python"}]}
+            }
 
         @self.mcp.tool()
-        async def find_library_docs(libraries: List[Dict[str, str]]) -> Dict[str, Any]:
-            """批量查询文档链接"""
-            return await self.find_library_docs(libraries)
+        async def find_library_docs(libraries: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+            return await self.find_library_docs(libraries) if libraries else {
+                "error": "参数 'libraries' 必填",
+                "example": {"libraries": [{"name": "requests", "language": "python", "version": "2.32.3"}]}
+            }
 
         @self.mcp.tool()
-        async def check_versions_exist(libraries: List[Dict[str, str]]) -> Dict[str, Any]:
-            """批量检查版本存在性"""
-            return await self.check_versions_exist(libraries)
+        async def check_versions_exist(libraries: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+            return await self.check_versions_exist(libraries) if libraries else {
+                "error": "参数 'libraries' 必填",
+                "example": {"libraries": [{"name": "requests", "language": "python", "version": "2.32.3"}]}
+            }
 
         @self.mcp.tool()
-        async def find_library_dependencies(libraries: List[Dict[str, str]]) -> Dict[str, Any]:
-            """批量查询依赖关系"""
-            return await self.find_library_dependencies(libraries)
+        async def find_library_dependencies(libraries: Optional[List[Dict[str, str]]] = None) -> Dict[str, Any]:
+            return await self.find_library_dependencies(libraries) if libraries else {
+                "error": "参数 'libraries' 必填",
+                "example": {"libraries": [{"name": "requests", "language": "python", "version": "2.32.3"}]}
+            }
 
 
         # 注册 Context7 工具（如果已初始化）
@@ -90,7 +104,7 @@ class LibraryMasterServer:
             """Context7 健康检查"""
             return await self.context7_tools.context7_health_check()
 
-    async def find_latest_versions(self, libraries: List[Dict[str, str]]) -> Dict[str, Any]:
+    async def find_latest_versions(self, libraries: Optional[List[Dict[str, str]]]) -> Dict[str, Any]:
         """批量查询最新版本
         
         Args:
@@ -100,6 +114,8 @@ class LibraryMasterServer:
             批量查询结果
         """
         try:
+            if not libraries:
+                return {"error": "参数 'libraries' 必填"}
             library_queries = [
                 LibraryQuery(name=lib["name"], language=Language.from_string(lib["language"]), version=None)
                 for lib in libraries
@@ -115,7 +131,7 @@ class LibraryMasterServer:
             self.logger.error(f"Error in find_latest_versions: {e}")
             return {"error": str(e)}
 
-    async def find_library_docs(self, libraries: List[Dict[str, str]]) -> Dict[str, Any]:
+    async def find_library_docs(self, libraries: Optional[List[Dict[str, str]]]) -> Dict[str, Any]:
         """批量查询文档链接
         
         Args:
@@ -125,6 +141,8 @@ class LibraryMasterServer:
             批量查询结果
         """
         try:
+            if not libraries:
+                return {"error": "参数 'libraries' 必填"}
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],
@@ -144,7 +162,7 @@ class LibraryMasterServer:
             self.logger.error(f"Error in find_library_docs: {e}")
             return {"error": str(e)}
 
-    async def check_versions_exist(self, libraries: List[Dict[str, str]]) -> Dict[str, Any]:
+    async def check_versions_exist(self, libraries: Optional[List[Dict[str, str]]]) -> Dict[str, Any]:
         """批量检查版本存在性
         
         Args:
@@ -154,6 +172,8 @@ class LibraryMasterServer:
             批量查询结果
         """
         try:
+            if not libraries:
+                return {"error": "参数 'libraries' 必填"}
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],
@@ -173,7 +193,7 @@ class LibraryMasterServer:
             self.logger.error(f"Error in check_versions_exist: {e}")
             return {"error": str(e)}
 
-    async def find_library_dependencies(self, libraries: List[Dict[str, str]]) -> Dict[str, Any]:
+    async def find_library_dependencies(self, libraries: Optional[List[Dict[str, str]]]) -> Dict[str, Any]:
         """批量查询依赖关系
         
         Args:
@@ -183,6 +203,8 @@ class LibraryMasterServer:
             批量查询结果
         """
         try:
+            if not libraries:
+                return {"error": "参数 'libraries' 必填"}
             library_queries = [
                 LibraryQuery(
                     name=lib["name"],

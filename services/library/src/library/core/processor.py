@@ -112,7 +112,18 @@ class BatchProcessor:
         """递归解析单个库的依赖"""
         start_time = time.time()
         language_value = lib.language.value if hasattr(lib.language, 'value') else str(lib.language)
-        max_depth = getattr(lib, 'depth', 1)
+        # 支持字符串深度和无界深度
+        max_depth_raw = getattr(lib, 'depth', '1')
+        is_unbounded = False
+        max_depth: int | None = None
+        try:
+            if isinstance(max_depth_raw, str) and max_depth_raw.strip().lower() in ("unbounded", "inf", "infinite"):
+                is_unbounded = True
+                max_depth = None
+            else:
+                max_depth = int(max_depth_raw) if isinstance(max_depth_raw, (int, str)) else int(max_depth_raw or 1)
+        except Exception:
+            max_depth = 1
         
         # 所有依赖的约束收集 {lib_name: [ver1, ver2]}
         all_constraints: Dict[str, List[str]] = {}
@@ -123,7 +134,7 @@ class BatchProcessor:
             library=lib.name,
             version=lib.version,
             operation=operation,
-            depth=max_depth
+            depth=max_depth_raw
         )
         
         try:
@@ -135,16 +146,23 @@ class BatchProcessor:
                 
             dependencies = root_result.data.get("dependencies", [])
             
-            # 如果深度>1，进行BFS
-            if max_depth > 1:
+            # 进行递归：当深度>1或为无界模式
+            if is_unbounded or (max_depth and max_depth > 1):
                 # 构建依赖树和收集约束
                 # 这一步会原地修改 dependencies 列表中的元素，添加 'dependencies' 字段
+                visited: Set[str] = set()
+                deadline = start_time + (self.request_timeout * 1.5)
+                max_items = 300
                 self._fetch_nested_dependencies(
                     dependencies, 
                     lib.language, 
                     current_depth=1, 
                     max_depth=max_depth,
-                    all_constraints=all_constraints
+                    all_constraints=all_constraints,
+                    visited=visited,
+                    unbounded=is_unbounded,
+                    deadline=deadline,
+                    max_items=max_items
                 )
             else:
                 # 仅深度1也需要收集约束用于冲突检测
@@ -180,10 +198,20 @@ class BatchProcessor:
                                   current_deps: List[Dict[str, Any]], 
                                   language: Any, 
                                   current_depth: int, 
-                                  max_depth: int,
-                                  all_constraints: Dict[str, List[str]]) -> None:
-        """BFS获取嵌套依赖"""
-        if current_depth >= max_depth or not current_deps:
+                                  max_depth: int | None,
+                                  all_constraints: Dict[str, List[str]],
+                                  visited: Set[str],
+                                  unbounded: bool = False,
+                                  deadline: float | None = None,
+                                  max_items: int | None = None) -> None:
+        """BFS获取嵌套依赖，支持无界深度并进行环检测"""
+        if not current_deps:
+            return
+        if not unbounded and max_depth is not None and current_depth >= max_depth:
+            return
+        if deadline is not None and time.time() >= deadline:
+            return
+        if max_items is not None and len(visited) >= max_items:
             return
 
         # 收集当前层级的依赖约束
@@ -201,6 +229,12 @@ class BatchProcessor:
             if version:
                 all_constraints[name].append(version)
             
+            # 环检测：避免重复解析同一库@版本/约束
+            visit_key = f"{name}@{version or ''}"
+            if visit_key in visited:
+                continue
+            visited.add(visit_key)
+            
             # 准备下一层查询的任务（只有当有明确版本或能获取到版本时才能继续）
             # 注意：很多依赖是版本范围，我们需要先"解析"出一个具体版本才能查下一层
             # 这里简化处理：如果version是范围，worker通常无法直接查，除非worker支持"获取满足范围的最新版"
@@ -213,7 +247,7 @@ class BatchProcessor:
                 library=name,
                 version=version, # 传递原始版本约束，让worker决定如何处理（通常worker需要具体版本）
                 operation="get_dependencies",
-                depth=max_depth # 任务本身的depth属性其实在worker里没用
+                depth=str(max_depth) if max_depth is not None else "unbounded" # 传播深度信息（用于缓存键）
             )
             next_level_tasks.append((dep, task))
 
@@ -241,6 +275,9 @@ class BatchProcessor:
                     # 更新解析后的具体版本
                     if "version" in res.data:
                         parent_dep["resolved_version"] = res.data["version"]
+                        # 使用解析后的具体版本作为visit_key，以避免同一依赖重复深入
+                        resolved_key = f"{parent_dep.get('name')}@{parent_dep.get('resolved_version') or ''}"
+                        visited.add(resolved_key)
                     
                     sub_deps = res.data.get("dependencies", [])
                     if sub_deps:
@@ -251,7 +288,11 @@ class BatchProcessor:
                             language, 
                             current_depth + 1, 
                             max_depth, 
-                            all_constraints
+                            all_constraints,
+                            visited,
+                            unbounded,
+                            deadline,
+                            max_items
                         )
             except Exception as e:
                 self.logger.warning(f"Failed to fetch nested dependency {task.library}: {e}")

@@ -32,6 +32,11 @@ class Context7Client:
             settings = Settings()
 
         self.api_key = settings.context7_api_key
+        # 尝试从环境变量获取
+        if not self.api_key:
+            import os
+            self.api_key = os.getenv("CONTEXT7_KEY") or os.getenv("CONTEXT7_API_KEY")
+            
         self.base_url = settings.context7_base_url or "https://context7.com/api/v1"
         self.timeout = settings.request_timeout
 

@@ -43,8 +43,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                             "required": ["name", "language"]
                         }
                     }
-                },
-                "required": ["libraries"]
+                }
             }
         ),
         Tool(
@@ -76,8 +75,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                             "required": ["name", "language"]
                         }
                     }
-                },
-                "required": ["libraries"]
+                }
             }
         ),
         Tool(
@@ -109,8 +107,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                             "required": ["name", "language", "version"]
                         }
                     }
-                },
-                "required": ["libraries"]
+                }
             }
         ),
         Tool(
@@ -142,8 +139,7 @@ def get_tool_definitions(settings: Settings = None) -> List[Tool]:
                             "required": ["name", "language"]
                         }
                     }
-                },
-                "required": ["libraries"]
+                }
             }
         )
     ]

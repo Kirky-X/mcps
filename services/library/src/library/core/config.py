@@ -32,7 +32,8 @@ class Settings(BaseSettings):
     # Context7 API配置
     context7_api_key: Optional[str] = Field(
         default=None,
-        description="Context7 API密钥"
+        description="Context7 API密钥",
+        validation_alias="CONTEXT7_KEY"  # 优先使用 CONTEXT7_KEY 环境变量
     )
     context7_base_url: str = Field(
         default="https://context7.com/api/v1",
