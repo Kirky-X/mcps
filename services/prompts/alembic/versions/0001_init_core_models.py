@@ -20,7 +20,7 @@ def upgrade() -> None:
     # Core tables by autogenerate are handled elsewhere; focus on vector and extensions
     conn = op.get_bind()
     dialect = conn.dialect.name
-    dim = int(os.getenv("VECTOR_DIMENSION", "1536"))
+    dim = int(os.getenv("VECTOR_DIMENSION", "768"))
 
     # Create core SQLModel tables if not exist
     # This migration assumes models are applied via application or later autogen revisions
@@ -28,15 +28,27 @@ def upgrade() -> None:
     if dialect == 'postgresql':
         # Enable pgvector extension
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
-        # Create vec_prompts table if not exists
+        
+        # Create vec_prompts table to match init_supabase_schema.sql exactly
         op.execute(
             """
             CREATE TABLE IF NOT EXISTS vec_prompts (
-                version_id TEXT PRIMARY KEY,
-                description_vector vector({dim})
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                version_id VARCHAR(36) NOT NULL REFERENCES prompt_versions(id) ON DELETE CASCADE,
+                description_vector VECTOR({dim}),
+                created_at TIMESTAMPTZ DEFAULT now()
             )
+            """.format(dim=dim)
+        )
+        
+        # Create index for faster vector queries (matching SQL file)
+        op.execute(
             """
-        .format(dim=dim))
+            CREATE INDEX IF NOT EXISTS idx_vec_prompts_version_id 
+            ON vec_prompts(version_id)
+            """
+        )
+        
         # Optional HNSW index (if available)
         try:
             op.execute(
@@ -47,17 +59,18 @@ def upgrade() -> None:
             )
         except Exception:
             pass
-        # Create RPC function for similarity search
+            
+        # Create RPC function for similarity search (matching SQL file)
         op.execute(
             """
             CREATE OR REPLACE FUNCTION match_prompt_versions (
-                query_embedding vector({dim}),
-                match_threshold float,
-                match_count int
+                query_embedding VECTOR({dim}),
+                match_threshold FLOAT,
+                match_count INT
             )
             RETURNS TABLE (
-                id varchar,
-                similarity float
+                id VARCHAR,
+                similarity FLOAT
             )
             LANGUAGE plpgsql
             AS $$
@@ -75,8 +88,16 @@ def upgrade() -> None:
             """.format(dim=dim)
         )
     elif dialect == 'sqlite':
-        # Create fallback table for envs without sqlite-vec; actual virtual table handled at runtime
-        op.execute("CREATE TABLE IF NOT EXISTS vec_prompts (version_id TEXT PRIMARY KEY, description_vector BLOB)")
+        # Create fallback table for envs without sqlite-vec
+        op.execute("""
+            CREATE TABLE IF NOT EXISTS vec_prompts (
+                id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+                version_id TEXT NOT NULL REFERENCES prompt_versions(id),
+                description_vector BLOB,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        op.execute("CREATE INDEX IF NOT EXISTS idx_vec_prompts_version_id ON vec_prompts(version_id)")
 
 
 def downgrade() -> None:
