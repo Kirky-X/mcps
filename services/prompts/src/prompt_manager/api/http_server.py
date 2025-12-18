@@ -1,5 +1,6 @@
 # Copyright (c) Kirky.X. 2025. All rights reserved.
 import asyncio
+import os
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -118,7 +119,12 @@ async def lifespan(app: FastAPI):
         Exception: 当启动或关闭过程中的任意步骤失败时可能抛出异常。
     """
     # Startup
-    config = load_config()
+    # Check if we're in test mode and reload config if needed
+    if os.environ.get("PROMPT_MANAGER_CONFIG_PATH"):
+        config = load_config(os.environ["PROMPT_MANAGER_CONFIG_PATH"])
+        logger.info(f"Using test config from: {os.environ['PROMPT_MANAGER_CONFIG_PATH']}")
+    else:
+        config = load_config()
     setup_logging(config.logging)
     start_background_monitor()
 
@@ -137,8 +143,13 @@ async def lifespan(app: FastAPI):
 
     if config.database.type == "supabase":
         try:
+            # Skip schema initialization if no connection string is available
             if config.database.connection_string:
-                await _init_supabase_schema(config.database.connection_string, dim)
+                try:
+                    await _init_supabase_schema(config.database.connection_string, dim)
+                except Exception as schema_error:
+                    logger.warning(f"Schema initialization skipped due to connection issues: {schema_error}")
+                    # Continue with Supabase client initialization even if schema init fails
 
             supabase_config = SupabaseConfig(
                 url=config.database.supabase_url or "",
@@ -288,8 +299,8 @@ async def create_prompt(request: CreatePromptRequest, manager: PromptManager = D
     except PromptManagerError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error("Create failed", error=str(e))
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        logger.error("Create failed", error=str(e), exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @app.post("/prompts/search")

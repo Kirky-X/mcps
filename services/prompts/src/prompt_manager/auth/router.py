@@ -10,7 +10,14 @@ from .manager import UserManager
 from .deps import get_user_db, get_async_session
 
 
-SECRET = os.getenv("FASTAPI_USERS_JWT_SECRET", "CHANGE_ME_JWT_SECRET")
+SECRET = os.getenv("FASTAPI_USERS_JWT_SECRET")
+if not SECRET or SECRET == "CHANGE_ME_JWT_SECRET":
+    # For development convenience, we can generate a temporary secret if not in production
+    if os.getenv("ENVIRONMENT", "development") == "development":
+        import secrets
+        SECRET = secrets.token_urlsafe(32)
+    else:
+        raise ValueError("FASTAPI_USERS_JWT_SECRET must be set to a secure random value in production")
 
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")

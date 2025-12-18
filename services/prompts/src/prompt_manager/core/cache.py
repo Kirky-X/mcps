@@ -87,36 +87,24 @@ class CacheManager:
         Returns:
             None
         """
-        print(f"[DEBUG] CacheManager.insert() called with key='{key}', value type={type(value)}, enabled={self.enabled}")
         if self.enabled:
-            print(f"[DEBUG] Cache enabled, inserting to memory cache")
             self.cache.insert(key, value)
             cache_dir = getattr(self, "_cache_dir", None)
-            print(f"[DEBUG] Cache dir: {cache_dir}")
             if cache_dir:
                 fp = Path(self._cache_dir) / f"{key}.json"
-                print(f"[DEBUG] Cache file path: {fp}")
                 try:
                     import json
                     # Only serialize if the value is JSON-serializable
                     if isinstance(value, (dict, list, str, int, float, bool)) or value is None:
-                        print(f"[DEBUG] Value is JSON-serializable, writing to file")
                         fp.write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
-                        print(f"[DEBUG] Successfully wrote cache file: {fp}")
-                        print(f"[DEBUG] Cache dir contents after write: {list(Path(self._cache_dir).glob('*.json'))}")
                     else:
                         # For complex objects, don't create a cache file
-                        # This prevents returning invalid data on cache read
-                        print(f"[DEBUG] Value is not JSON-serializable (type: {type(value)}), skipping file write")
                         pass
-                except Exception as e:
-                    print(f"[DEBUG] Exception during cache file write: {e}")
+                except Exception:
                     # If serialization fails, don't create a cache file
                     pass
-            else:
-                print(f"[DEBUG] No cache directory configured")
         else:
-            print(f"[DEBUG] Cache is disabled, skipping insert")
+            pass
 
     def invalidate(self, key: str):
         """使某个键失效

@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional, Union
 
 from supabase._async.client import AsyncClient
 from supabase.lib.client_options import ClientOptions
+from supabase_auth._async.storage import AsyncMemoryStorage
 
 from ..utils.config import SupabaseConfig
 from ..utils.exceptions import DatabaseError
@@ -38,13 +39,10 @@ class SupabaseService:
             return
 
         try:
+            # Use default ClientOptions and let Supabase handle the initialization
             self.client = await AsyncClient.create(
                 self.config.url, 
-                self.config.key,
-                options=ClientOptions(
-                    postgrest_client_timeout=10,
-                    storage_client_timeout=10
-                )
+                self.config.key
             )
             await self.check_connection()
             self._initialized = True
@@ -55,7 +53,7 @@ class SupabaseService:
     async def check_connection(self):
         """测试数据库连接
 
-        通过查询 tags 表的计数来验证连接是否正常。
+        通过执行一个简单的操作来验证连接是否正常。
 
         Raises:
             DatabaseError: 当查询失败时抛出。
@@ -64,10 +62,9 @@ class SupabaseService:
             raise DatabaseError("Client not initialized")
         
         try:
-            # Simple lightweight query to check connection
-            # Assuming 'tags' table exists, or we can use a system query if permissions allow
-            # But for app logic, accessing a known table is better.
-            await self.client.table("tags").select("id", count="exact").limit(1).execute()
+            # Execute a simple query to test the connection
+            await self.client.table("prompts").select("*").limit(1).execute()
+            logger.info("Supabase connection check successful")
         except Exception as e:
             logger.error(f"Supabase connection check failed: {str(e)}")
             raise self._handle_supabase_error(e)
