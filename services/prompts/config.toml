@@ -1,10 +1,23 @@
 [database]
-type = "sqlite"
-path = "${PROMPT_MANAGER_DB_PATH}"
+type = "supabase"
+# PostgreSQL connection string for DDL operations
+connection_string = "postgresql+asyncpg://postgres:72cfq5moqPhw3P0u@db.zwasybtaasnbiukyrubz.supabase.co:5432/postgres"
+supabase_url = "https://zwasybtaasnbiukyrubz.supabase.co"
+supabase_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXN5YnRhYXNuYml1a3lydWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMTc1MTMsImV4cCI6MjA3NjU5MzUxM30.F3tj3GQwVcp-dc9onZ6yEF8RKuD_EzCu3uqaRiy7KJU"
 pool_size = 10
 max_overflow = 20
-supabase_url = "${SUPABASE_URL}"
-supabase_key = "${SUPABASE_KEY}"
+
+[vector]
+enabled = true
+# 根据环境变量选择向量模型，默认使用ada-002
+embedding_model = "${PROMPT_MANAGER_EMBEDDING_MODEL:-text-embedding-ada-002}"
+embedding_api_key = "${OPENAI_API_KEY}"
+provider_priority = "remote_first"
+local_model_id = "BAAI/bge-m3"
+use_modelscope = true
+batch_size = 12
+max_length = 8192
+# dimension = 1536  # Optional: if not set, will be inferred from model output
 
 [cache]
 enabled = true
@@ -12,23 +25,13 @@ type = "filesystem"
 max_capacity = 1000
 ttl_seconds = 3600
 idle_timeout_seconds = 1800
-dir = "${PROMPT_MANAGER_CACHE_DIR}"
+# 根据环境变量选择缓存目录，默认使用./cache
+dir = "${PROMPT_MANAGER_CACHE_DIR:-./cache}"
 
 [concurrency]
 queue_enabled = true
 queue_max_size = 100
 optimistic_lock_enabled = true
-
-[vector]
-enabled = true
-# dimension = 1536  # Optional: if not set, will be inferred from model output
-embedding_model = "text-embedding-ada-002"
-embedding_api_key = "${OPENAI_API_KEY}"
-provider_priority = "remote_first"
-local_model_id = "BAAI/bge-m3"
-use_modelscope = true
-batch_size = 12
-max_length = 8192
 
 [logging]
 level = "INFO"
@@ -40,7 +43,8 @@ console_output = true
 [api.http]
 enabled = true
 host = "0.0.0.0"
-port = 8000
+# 根据环境变量选择端口，默认使用8000
+port = "${PROMPT_MANAGER_API_PORT:-8000}"
 
 [prompt]
 text = "${PROMPT_MANAGER_PROMPT}"
