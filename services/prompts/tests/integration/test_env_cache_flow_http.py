@@ -1,4 +1,3 @@
-import os
 from types import SimpleNamespace
 from pathlib import Path
 from fastapi.testclient import TestClient
@@ -17,6 +16,13 @@ def test_env_cache_flow_http(tmp_path, monkeypatch):
 
     # Import app after env is set so lifespan uses our config
     from prompt_manager.api.http_server import app, current_active_user
+
+    # Reset app state to ensure clean test environment
+    app.state.db_initialized = False
+    if hasattr(app.state, 'vector_index'):
+        delattr(app.state, 'vector_index')
+    if hasattr(app.state, 'manager'):
+        delattr(app.state, 'manager')
 
     # Override auth dependency
     app.dependency_overrides[current_active_user] = lambda: SimpleNamespace(id="u1")
