@@ -1,0 +1,30 @@
+[database]
+type = "sqlite"
+path = ":memory:"
+pool_size = 1
+max_overflow = 0
+
+[vector]
+enabled = true
+dimension = 4
+embedding_model = "test"
+embedding_api_key = "sk-test"
+
+[cache]
+enabled = true
+max_capacity = 100
+ttl_seconds = 60
+idle_timeout_seconds = 60
+
+[concurrency]
+queue_enabled = false
+queue_max_size = 10
+
+[logging]
+level = "DEBUG"
+console_output = true
+
+[api]
+http.enabled = true
+http.host = "localhost"
+http.port = 8000
