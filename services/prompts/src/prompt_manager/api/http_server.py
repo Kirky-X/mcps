@@ -340,7 +340,7 @@ async def get_prompt(request: GetRequest, manager: PromptManager = Depends(get_m
     except PromptManagerError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error("Get prompt failed", error=str(e))
+        logger.error(f"Get prompt failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 

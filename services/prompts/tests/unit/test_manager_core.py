@@ -157,12 +157,24 @@ async def test_get_full_flow_cache_miss(manager, mock_deps):
         MagicMock(role_type="system", content="Sys", template_variables=None),
         MagicMock(role_type="user", content="Hi", template_variables=None)
     ]
-    mock_ver.llm_config = MagicMock(model="gpt-4")
+    # Create a proper mock for llm_config with string attributes
+    mock_llm_config = MagicMock()
+    mock_llm_config.model = "gpt-4"
+    mock_llm_config.temperature = 0.7
+    mock_llm_config.max_tokens = 1000
+    mock_llm_config.top_p = 1.0
+    mock_llm_config.frequency_penalty = 0.0
+    mock_llm_config.presence_penalty = 0.0
+    mock_llm_config.stop_sequences = None
+    mock_ver.llm_config = mock_llm_config
     mock_ver.principle_refs = []
     mock_ver.client_mappings = []
     
+    # Mock the result to have scalars().first() method
+    mock_scalars = MagicMock()
+    mock_scalars.first.return_value = mock_ver
     mock_result = MagicMock()
-    mock_result.scalar_one_or_none.return_value = mock_ver
+    mock_result.scalars.return_value = mock_scalars
     session.execute.return_value = mock_result
     
     # Mock _load_principles to return empty list

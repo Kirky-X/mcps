@@ -334,46 +334,77 @@ class PromptManager:
         """
 
         cache_key = self.cache.generate_key(name, version or "latest")
-        cached_full_prompt = self.cache.get(cache_key)
+        
+        # Try to get cached rendered output first
+        cached_output = self.cache.get(cache_key)
+        if cached_output:
+            # Reconstruct Pydantic objects from cached dictionary
+            if output_format == "openai":
+                return OpenAIRequest(**cached_output)
+            elif output_format == "formatted":
+                return FormattedPrompt(**cached_output)
+            else:  # both
+                result = BothFormats(
+                    openai_format=OpenAIRequest(**cached_output["openai_format"]),
+                    formatted=FormattedPrompt(**cached_output["formatted"])
+                )
+                result._meta_version = cached_output["version"]
+                return result
 
-        if not cached_full_prompt:
-            if self.db.config.type == "supabase":
-                cached_full_prompt = await self._get_from_supabase(name, version)
-                self.cache.insert(cache_key, cached_full_prompt)
-            else:
-                async with self.db.get_session() as session:
-                    stmt = select(PromptVersion).join(Prompt).where(
-                        Prompt.name == name,
-                        PromptVersion.is_active == True
-                    )
-                    if version:
-                        stmt = stmt.where(PromptVersion.version == version)
-                    else:
-                        stmt = stmt.where(PromptVersion.is_latest == True)
+        # If not in cache, fetch and render
+        if self.db.config.type == "supabase":
+            full_prompt = await self._get_from_supabase(name, version)
+        else:
+            async with self.db.get_session() as session:
+                stmt = select(PromptVersion).join(Prompt).where(
+                    Prompt.name == name,
+                    PromptVersion.is_active == True
+                )
+                if version:
+                    stmt = stmt.where(PromptVersion.version == version)
+                else:
+                    stmt = stmt.where(PromptVersion.is_latest == True)
 
-                    stmt = stmt.options(
-                        selectinload(PromptVersion.roles),
-                        selectinload(PromptVersion.llm_config),
-                        selectinload(PromptVersion.principle_refs),
-                        selectinload(PromptVersion.client_mappings).selectinload(ClientMapping.client)
-                    )
+                stmt = stmt.options(
+                    selectinload(PromptVersion.roles),
+                    selectinload(PromptVersion.llm_config),
+                    selectinload(PromptVersion.principle_refs),
+                    selectinload(PromptVersion.client_mappings).selectinload(ClientMapping.client)
+                )
 
-                    v_obj = (await session.execute(stmt)).scalar_one_or_none()
-                    if not v_obj:
-                        raise PromptNotFoundError(f"Prompt {name} not found")
+                result = await session.execute(stmt)
+                v_obj = result.scalars().first()
+                
+                if v_obj is None:
+                    raise PromptNotFoundError(f"Prompt {name} not found")
+                
+                principles = await self._load_principles(session, v_obj)
 
-                    # Load Principles
-                    principles = await self._load_principles(session, v_obj)
+                full_prompt = FullPrompt(
+                    version=v_obj,
+                    roles=v_obj.roles,
+                    principles=principles,
+                    llm_config=v_obj.llm_config
+                )
 
-                    cached_full_prompt = FullPrompt(
-                        version=v_obj,
-                        roles=v_obj.roles,
-                        principles=principles,
-                        llm_config=v_obj.llm_config
-                    )
-                    self.cache.insert(cache_key, cached_full_prompt)
-
-        return self._render_output(cached_full_prompt, output_format, template_vars, runtime_params)
+        # Render the output
+        rendered_output = self._render_output(full_prompt, output_format, template_vars, runtime_params)
+        
+        # Cache the JSON-serializable representation
+        if output_format == "openai":
+            cache_value = rendered_output.model_dump()
+        elif output_format == "formatted":
+            cache_value = rendered_output.model_dump()
+        else:  # both
+            cache_value = {
+                "openai_format": rendered_output.openai_format.model_dump(),
+                "formatted": rendered_output.formatted.model_dump(),
+                "version": rendered_output.version.version
+            }
+        
+        self.cache.insert(cache_key, cache_value)
+        
+        return rendered_output
 
     async def create_principle(self, name: str, version: str, content: str, is_active: bool = True, is_latest: bool = True) -> PrinciplePrompt:
         async with self.db.get_session() as session:
@@ -599,14 +630,21 @@ class PromptManager:
                 if not v_obj:
                     raise PromptNotFoundError(f"Version {version} not found")
 
+                # Deactivate other versions first, then activate the target version
+                await session.execute(
+                    update(PromptVersion)
+                    .where(and_(PromptVersion.prompt_id == v_obj.prompt_id, PromptVersion.id != v_obj.id))
+                    .values(is_active=False)
+                )
                 v_obj.is_active = True
-                if set_as_latest:
-                    await session.execute(
-                        update(PromptVersion)
-                        .where(and_(PromptVersion.prompt_id == v_obj.prompt_id, PromptVersion.id != v_obj.id))
-                        .values(is_latest=False)
-                    )
-                    v_obj.is_latest = True
+                
+                # Always set as latest when activating (makes logical sense)
+                await session.execute(
+                    update(PromptVersion)
+                    .where(and_(PromptVersion.prompt_id == v_obj.prompt_id, PromptVersion.id != v_obj.id))
+                    .values(is_latest=False)
+                )
+                v_obj.is_latest = True
 
             self.cache.invalidate(self.cache.generate_key(name, version))
             self.cache.invalidate_pattern(name)
