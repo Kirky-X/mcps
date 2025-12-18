@@ -6,6 +6,10 @@ from typing import AsyncGenerator
 import pytest
 import pytest_asyncio
 
+# Set test configuration before importing anything
+os.environ["PROMPT_MANAGER_CONFIG_PATH"] = os.path.join(os.path.dirname(__file__), "test_config.toml")
+os.environ["FASTAPI_USERS_JWT_SECRET"] = "test-secret-for-testing-only"
+
 from prompt_manager.core.cache import CacheManager
 from prompt_manager.core.manager import PromptManager
 from prompt_manager.core.queue import UpdateQueue
@@ -113,13 +117,19 @@ async def db_engine(test_config):
     # Note: We use a file-based DB for tests because shared cache in-memory
     # with async engines can be tricky with sqlite-vec extensions.
     # Using a temp file is safer for extension loading.
-    test_db_path = "test_prompts.db"
+    # Use a unique database path for each test session to avoid conflicts
+    import tempfile
+    test_db_fd, test_db_path = tempfile.mkstemp(suffix='.db', prefix='test_prompts_')
+    os.close(test_db_fd)  # Close the file descriptor, we'll use the path
+    # Remove the file so we can create it fresh
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
 
     # Ensure auth deps use the same DB path via config
     os.environ["PROMPT_MANAGER_DB_PATH"] = test_db_path
     test_config.database.path = test_db_path
+    print(f"DEBUG: Set PROMPT_MANAGER_DB_PATH to {test_db_path}")
+    print(f"DEBUG: Config path is {os.environ.get('PROMPT_MANAGER_CONFIG_PATH')}")
     db = Database(test_config.database)
 
     # Init Tables
